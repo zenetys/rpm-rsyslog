@@ -218,7 +218,7 @@ OPTIONS=(
   # --enable-journal-tests
   --enable-pmlastmsg
   # --enable-pmcisconames
-  # --enable-pmciscoios
+  --enable-pmciscoios
   --enable-pmnull
   --enable-pmnormalize
   # --enable-pmaixforwardedfrom
@@ -363,6 +363,7 @@ done
 %{_libdir}/rsyslog/omtesting.so
 %{_libdir}/rsyslog/omudpspoof.so
 %{_libdir}/rsyslog/omuxsock.so
+%{_libdir}/rsyslog/pmciscoios.so
 %{_libdir}/rsyslog/pmnormalize.so
 %{_libdir}/rsyslog/pmnull.so
 %{_sbindir}/rsyslog_diag_hostname
