@@ -257,6 +257,11 @@ OPTIONS=(
 
 %install
 (
+  cd %{liblognorm}
+  install -d -m 755 %{buildroot}%{_bindir}/
+  install -p -m 755 src/lognormalizer %{buildroot}%{_bindir}/
+)
+(
   cd rsyslog-%{version}
   %make_install pkglibdir=%{_libdir}/rsyslog
   install -d -m 755 %{buildroot}%{_docdir}
@@ -371,6 +376,7 @@ done
 %{_libdir}/rsyslog/imjournal.so
 %{_libdir}/rsyslog/omjournal.so
 %endif
+%{_bindir}/lognormalizer
 %{_bindir}/rsyslog-recover-qi.pl
 %config(noreplace) %{_sysconfdir}/rsyslog.conf
 %dir %{_sysconfdir}/rsyslog.d
