@@ -41,6 +41,8 @@ Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxmin
 Patch0: rsyslog-systemd-centos7.patch
 %endif
 
+Patch100: rsyslog-ompipe-resume.patch
+
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
 Packager: Benoit DOLEZ <bdolez@zenetys.com>
@@ -89,11 +91,12 @@ Rsyslog is an enhanced, multi-threaded syslog daemon.
 %setup -T -D -a 401
 %setup -T -D -a 402
 
-%if 0%{?rhel} >= 7
 cd rsyslog-%{version}
+%if 0%{?rhel} >= 7
 %patch0 -p1
-cd ..
 %endif
+%patch100 -p1
+cd ..
 
 %build
 export CFLAGS="-fPIC"
