@@ -42,6 +42,7 @@ Patch0: rsyslog-systemd-centos7.patch
 %endif
 
 Patch100: rsyslog-ompipe-resume.patch
+Patch200: liblognorm-cef-first-extension.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -96,6 +97,10 @@ cd rsyslog-%{version}
 %patch0 -p1
 %endif
 %patch100 -p1
+cd ..
+
+cd %{liblognorm}
+%patch200 -p1
 cd ..
 
 %build
