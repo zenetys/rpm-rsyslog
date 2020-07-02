@@ -38,7 +38,7 @@ Source401: https://github.com/libnet/libnet/releases/download/v%{libnet_version}
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 
 %if 0%{?rhel} >= 7
-Patch0: rsyslog-systemd-centos7.patch
+Patch0: rsyslog-systemd-centos8.patch
 %endif
 
 Patch100: rsyslog-ompipe-resume.patch
@@ -94,7 +94,7 @@ Rsyslog is an enhanced, multi-threaded syslog daemon.
 
 cd rsyslog-%{version}
 %if 0%{?rhel} >= 7
-%patch0 -p1
+%patch0 -p0
 %endif
 %patch100 -p1
 cd ..
