@@ -27,7 +27,9 @@ Group: System Environment/Daemons
 Source0: http://www.rsyslog.com/files/download/rsyslog/rsyslog-%{version}.tar.gz
 Source10: rsyslog.conf
 Source11: rsyslog.sysconfig
-Source12: rsyslog.log
+Source12: rsyslog.logrotate.systemd
+Source13: rsyslog.logrotate.init
+Source14: rsyslog.init
 Source300: http://libestr.adiscon.com/files/download/%{libestr}.tar.gz
 Source301: http://www.liblognorm.com/files/download/%{liblognorm}.tar.gz
 Source302: http://download.rsyslog.com/liblogging/%{liblogging}.tar.gz
@@ -67,6 +69,11 @@ BuildRequires: systemd-devel >= 219-39
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
+%else
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/chkconfig
+Requires(preun): /sbin/service
+Requires(postun): /sbin/service
 %endif
 
 Requires: logrotate >= 3.5.2
@@ -321,11 +328,14 @@ install -D -p -m 644 %{SOURCE11} %{buildroot}%{_sysconfdir}/sysconfig/rsyslog
 %if 0%{?rhel} >= 7
 sed -i -e 's/^#imjournal# //' %{buildroot}%{_sysconfdir}/rsyslog.conf
 sed -i -e '/^#imklog# /d' %{buildroot}%{_sysconfdir}/rsyslog.conf
+install -D -p -m 644 %{SOURCE12} %{buildroot}%{_sysconfdir}/logrotate.d/syslog
 %else
 sed -i -e '/^#imjournal# /d' %{buildroot}%{_sysconfdir}/rsyslog.conf
 sed -i -e 's/^#imklog# //' %{buildroot}%{_sysconfdir}/rsyslog.conf
+install -D -p -m 644 %{SOURCE13} %{buildroot}%{_sysconfdir}/logrotate.d/syslog
+install -D -p -m 755 %{SOURCE14} %{buildroot}%{_initrddir}/rsyslog
+rm -rf %{buildroot}%{_unitdir}
 %endif
-install -D -p -m 644 %{SOURCE12} %{buildroot}%{_sysconfdir}/logrotate.d/syslog
 
 cat rsyslog-%{version}/tools/recover_qi.pl |
   tr -d '\r' > %{buildroot}%{_bindir}/rsyslog-recover-qi.pl
@@ -340,12 +350,27 @@ done
 
 %if 0%{?rhel} >= 7
 %systemd_post rsyslog.service
+%else
+/sbin/chkconfig --add rsyslog
+%endif
 
 %preun
+%if 0%{?rhel} >= 7
 %systemd_preun rsyslog.service
+%else
+if [ "$1" = 0 ]; then
+  /sbin/service rsyslog stop >/dev/null 2>&1 || :
+  /sbin/chkconfig --del rsyslog
+fi
+%endif
 
 %postun
+%if 0%{?rhel} >= 7
 %systemd_postun_with_restart rsyslog.service
+%else
+if [ "$1" -ge 1 ]; then
+  /sbin/service rsyslog condrestart >/dev/null 2>&1 || :
+fi
 %endif
 
 %files
@@ -424,5 +449,7 @@ done
 %config(noreplace) %{_sysconfdir}/logrotate.d/syslog
 %if 0%{?rhel} >= 7
 %{_unitdir}/rsyslog.service
+%else
+%{_initrddir}/rsyslog
 %endif
 %dir %{_var}/lib/rsyslog
