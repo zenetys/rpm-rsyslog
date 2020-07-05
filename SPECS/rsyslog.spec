@@ -20,7 +20,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 1%{?dist}.zenetys
+Release: 2%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -45,6 +45,7 @@ Patch0: rsyslog-systemd-centos8.patch
 %endif
 
 Patch200: liblognorm-cef-first-extension.patch
+Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -144,6 +145,7 @@ cd ..
 
 cd %{liblognorm}
 %patch200 -p1
+%patch201 -p1
 cd ..
 
 %build
