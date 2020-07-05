@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 4%{?dist}.zenetys
+Release: 5%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -356,6 +356,14 @@ done
 %systemd_post rsyslog.service
 %else
 /sbin/chkconfig --add rsyslog
+%endif
+
+%if 0%{?rhel} == 7
+if [ -f /etc/rsyslog.d/listen.conf ]; then
+    # This file is brought by the systemd package and produces
+    # a warning at rsyslog start. Comment out the directive.
+    sed -i -re 's,^\s*(\$SystemLogSocketName\s),# \1,' /etc/rsyslog.d/listen.conf
+fi
 %endif
 
 %preun
