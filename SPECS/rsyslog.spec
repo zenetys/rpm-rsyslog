@@ -8,8 +8,8 @@
 %define liblognorm              liblognorm-2.0.6
 %define liblogging              liblogging-1.0.6
 %define libfastjson             libfastjson-0.99.8
-%define librelp                 librelp-1.4.0
-%define libcurl                 curl-7.67.0
+%define librelp                 librelp-1.6.0
+%define libcurl                 curl-7.71.1
 %define libnet_version          1.2
 %define libnet                  libnet-%{libnet_version}
 %define libmaxminddb_version    1.4.2
@@ -19,7 +19,7 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2001.0
+Version: 8.2006.0
 Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
@@ -43,7 +43,6 @@ Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxmin
 Patch0: rsyslog-systemd-centos8.patch
 %endif
 
-Patch100: rsyslog-ompipe-resume.patch
 Patch200: liblognorm-cef-first-extension.patch
 
 URL: http://www.rsyslog.com/
@@ -135,7 +134,6 @@ cd rsyslog-%{version}
 %if 0%{?rhel} >= 7
 %patch0 -p0
 %endif
-%patch100 -p1
 cd ..
 
 cd %{liblognorm}
