@@ -73,10 +73,42 @@ Requires: logrotate >= 3.5.2
 Requires: openssl-libs
 Requires: gnutls
 Requires: bash >= 2.0
-Provides: config(rsyslog) = %version-%release
-Provides: rsyslog = %version-%release
-Provides: rsyslog(x86-64) = %version-%release
+
+Provides: rsyslog
+Provides: rsyslog-elasticsearch
+Provides: rsyslog-fmhash
+Provides: rsyslog-fmhttp
+Provides: rsyslog-gnutls
+Provides: rsyslog-mmaudit
+Provides: rsyslog-mmfields
+Provides: rsyslog-mmjsonparse
+Provides: rsyslog-mmnormalize
+Provides: rsyslog-mmrm1stspace
+Provides: rsyslog-omhttp
+Provides: rsyslog-openssl
+Provides: rsyslog-pmciscoios
+Provides: rsyslog-relp
+Provides: rsyslog-snmp
+Provides: rsyslog-udpspoof
 Provides: syslog
+
+Obsoletes: rsyslog
+Obsoletes: rsyslog-elasticsearch
+Obsoletes: rsyslog-fmhash
+Obsoletes: rsyslog-fmhttp
+Obsoletes: rsyslog-gnutls
+Obsoletes: rsyslog-mmaudit
+Obsoletes: rsyslog-mmfields
+Obsoletes: rsyslog-mmjsonparse
+Obsoletes: rsyslog-mmnormalize
+Obsoletes: rsyslog-mmrm1stspace
+Obsoletes: rsyslog-omhttp
+Obsoletes: rsyslog-openssl
+Obsoletes: rsyslog-pmciscoios
+Obsoletes: rsyslog-relp
+Obsoletes: rsyslog-snmp
+Obsoletes: rsyslog-udpspoof
+Obsoletes: syslog
 
 %description
 Rsyslog is an enhanced, multi-threaded syslog daemon.
