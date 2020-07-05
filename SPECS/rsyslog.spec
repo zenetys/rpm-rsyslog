@@ -195,7 +195,7 @@ export LIBS="${LIBNET_LIBS} ${MAXMINDDB_LIBS}"
 OPTIONS=(
   --enable-regexp
   --enable-fmhash
-  # --enable-fmhash-xxhash
+  --enable-fmhash-xxhash
   # --enable-gssapi-krb5
   --enable-klog
   --enable-kmsg
@@ -243,7 +243,7 @@ OPTIONS=(
   # --enable-mmkubernetes
 
   --enable-omhttp
-  # --enable-omfile-hardened
+  --enable-omfile-hardened
   --enable-relp
   --enable-omrelp-default-port
   # --enable-ksi-ls12
@@ -268,7 +268,7 @@ OPTIONS=(
   --enable-pmnormalize
   # --enable-pmaixforwardedfrom
   # --enable-pmsnare
-  # --enable-pmpanngfw
+  --enable-pmpanngfw
   --enable-omudpspoof
   --enable-omruleset
   --enable-omuxsock
@@ -420,7 +420,7 @@ fi
 %{_libdir}/rsyslog/mmsequence.so
 %{_libdir}/rsyslog/mmsnmptrapd.so
 %{_libdir}/rsyslog/mmutf8fix.so
-# %{_libdir}/rsyslog/omfile-hardened.so
+%{_libdir}/rsyslog/omfile-hardened.so
 %{_libdir}/rsyslog/omhttp.so
 %{_libdir}/rsyslog/ommail.so
 %{_libdir}/rsyslog/omprog.so
@@ -434,6 +434,7 @@ fi
 %{_libdir}/rsyslog/pmciscoios.so
 %{_libdir}/rsyslog/pmnormalize.so
 %{_libdir}/rsyslog/pmnull.so
+%{_libdir}/rsyslog/pmpanngfw.so
 %{_sbindir}/rsyslog_diag_hostname
 %if 0%{?rhel} >= 7
 %{_libdir}/rsyslog/imjournal.so
