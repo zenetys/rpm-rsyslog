@@ -9,7 +9,9 @@
 %define liblogging              liblogging-1.0.6
 %define libfastjson             libfastjson-0.99.8
 %define librelp                 librelp-1.6.0
+%if 0%{?rhel} <= 7
 %define libcurl                 curl-7.71.1
+%endif
 %define libmaxminddb_version    1.4.2
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
 %define builddir                %{_builddir}/%{name}-%{version}
@@ -33,7 +35,9 @@ Source301: http://www.liblognorm.com/files/download/%{liblognorm}.tar.gz
 Source302: http://download.rsyslog.com/liblogging/%{liblogging}.tar.gz
 Source303: http://download.rsyslog.com/libfastjson/%{libfastjson}.tar.gz
 Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
+%if 0%{?rhel} <= 7
 Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
+%endif
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 
 %if 0%{?rhel} >= 7
@@ -59,6 +63,10 @@ BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
 BuildRequires: zlib-devel
+
+%if 0%{?rhel} >= 8
+BuildRequires: pkgconfig(libcurl)
+%endif
 
 %if 0%{?rhel} >= 7
 BuildRequires: systemd-devel >= 219-39
@@ -123,7 +131,9 @@ Rsyslog is an enhanced, multi-threaded syslog daemon.
 %setup -T -D -a 302
 %setup -T -D -a 303
 %setup -T -D -a 304
+%if 0%{?rhel} <= 7
 %setup -T -D -a 400
+%endif
 %setup -T -D -a 402
 
 cd rsyslog-%{version}
@@ -167,10 +177,12 @@ export LIBLOGGING_STDLOG_LIBS="%{builddir}/%{liblogging}/stdlog/.libs/liblogging
 export RELP_CFLAGS="-I%{builddir}/%{librelp}/src"
 export RELP_LIBS="%{builddir}/%{librelp}/src/.libs/librelp.a -L%{builddir}/%{librelp}/src/.libs -lgnutls"
 
+%if 0%{?rhel} <= 7
 ( cd %{libcurl} && %configure %{static_only} && make %{?_smp_mflags} )
 
 export CURL_CFLAGS="-I%{builddir}/%{libcurl}/include"
 export CURL_LIBS="%{builddir}/%{libcurl}/lib/.libs/libcurl.a -L%{builddir}/%{libcurl}/lib/.libs -lz -lssl -lcrypto"
+%endif
 
 ( cd %{libmaxminddb} && %configure %{static_only} && make %{?_smp_mflags} )
 
