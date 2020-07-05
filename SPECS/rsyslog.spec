@@ -49,19 +49,18 @@ URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
 Packager: Benoit DOLEZ <bdolez@zenetys.com>
 
-BuildRequires: automake
 BuildRequires: autoconf
-BuildRequires: libtool
+BuildRequires: automake
 BuildRequires: bison
 BuildRequires: flex
-BuildRequires: libuuid-devel
-BuildRequires: pkgconfig
-BuildRequires: zlib-devel
-BuildRequires: libgcrypt-devel
-BuildRequires: libuuid-devel
 BuildRequires: gnutls-devel
+BuildRequires: libgcrypt-devel
+BuildRequires: libtool
+BuildRequires: libuuid-devel
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
+BuildRequires: pkgconfig
+BuildRequires: zlib-devel
 
 %if 0%{?rhel} >= 7
 BuildRequires: systemd-devel >= 219-39
