@@ -10,8 +10,6 @@
 %define libfastjson             libfastjson-0.99.8
 %define librelp                 librelp-1.6.0
 %define libcurl                 curl-7.71.1
-%define libnet_version          1.2
-%define libnet                  libnet-%{libnet_version}
 %define libmaxminddb_version    1.4.2
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
 %define builddir                %{_builddir}/%{name}-%{version}
@@ -36,7 +34,6 @@ Source302: http://download.rsyslog.com/liblogging/%{liblogging}.tar.gz
 Source303: http://download.rsyslog.com/libfastjson/%{libfastjson}.tar.gz
 Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
-Source401: https://github.com/libnet/libnet/releases/download/v%{libnet_version}/%{libnet}.tar.gz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 
 %if 0%{?rhel} >= 7
@@ -55,6 +52,7 @@ BuildRequires: bison
 BuildRequires: flex
 BuildRequires: gnutls-devel
 BuildRequires: libgcrypt-devel
+BuildRequires: libnet-devel
 BuildRequires: libtool
 BuildRequires: libuuid-devel
 BuildRequires: net-snmp-devel
@@ -126,7 +124,6 @@ Rsyslog is an enhanced, multi-threaded syslog daemon.
 %setup -T -D -a 303
 %setup -T -D -a 304
 %setup -T -D -a 400
-%setup -T -D -a 401
 %setup -T -D -a 402
 
 cd rsyslog-%{version}
@@ -169,14 +166,6 @@ export LIBLOGGING_STDLOG_LIBS="%{builddir}/%{liblogging}/stdlog/.libs/liblogging
 
 export RELP_CFLAGS="-I%{builddir}/%{librelp}/src"
 export RELP_LIBS="%{builddir}/%{librelp}/src/.libs/librelp.a -L%{builddir}/%{librelp}/src/.libs -lgnutls"
-
-( cd %{libnet} && %configure %{static_only} && make %{?_smp_mflags} )
-
-export LIBNET_CFLAGS="-I%{builddir}/%{libnet}/include"
-export LIBNET_LIBS="%{builddir}/%{libnet}/src/.libs/libnet.a -L%{builddir}/%{libnet}/src/.libs"
-
-export UDPSPOOF_CFLAGS="${LIBNET_CFLAGS}"
-export UDPSPOOF_LIBS="${LIBNET_LIBS}"
 
 ( cd %{libcurl} && %configure %{static_only} && make %{?_smp_mflags} )
 
