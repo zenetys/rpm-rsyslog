@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 5%{?dist}.zenetys
+Release: 6%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -181,7 +181,7 @@ export LIBLOGGING_STDLOG_LIBS="%{builddir}/%{liblogging}/stdlog/.libs/liblogging
 ( cd %{librelp} && %configure %{static_only} && make %{?_smp_mflags} )
 
 export RELP_CFLAGS="-I%{builddir}/%{librelp}/src"
-export RELP_LIBS="%{builddir}/%{librelp}/src/.libs/librelp.a -L%{builddir}/%{librelp}/src/.libs -lgnutls"
+export RELP_LIBS="%{builddir}/%{librelp}/src/.libs/librelp.a -L%{builddir}/%{librelp}/src/.libs -lgnutls -lssl -lcrypto"
 
 %if 0%{?rhel} <= 7
 ( cd %{libcurl} && %configure %{static_only} && make %{?_smp_mflags} )
