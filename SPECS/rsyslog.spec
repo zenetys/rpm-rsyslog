@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 6%{?dist}.zenetys
+Release: 7%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -45,6 +45,8 @@ Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxmin
 %if 0%{?rhel} >= 7
 Patch0: rsyslog-systemd-centos8.patch
 %endif
+
+Patch100: rsyslog-omelasticsearch-empty-pipeline.patch
 
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
@@ -143,6 +145,7 @@ Rsyslog is an enhanced, multi-threaded syslog daemon.
 cd rsyslog-%{version}
 %if 0%{?rhel} >= 7
 %patch0 -p0
+%patch100 -p1
 %endif
 cd ..
 
