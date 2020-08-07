@@ -14,7 +14,7 @@
 %if 0%{?rhel} <= 7
 %define libcurl                 curl-7.71.1
 %endif
-%define libmaxminddb_version    1.4.2
+%define libmaxminddb_version    1.4.3
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
 %define builddir                %{_builddir}/%{name}-%{version}
 %define static_only             --enable-static --disable-shared

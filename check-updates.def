@@ -5,4 +5,4 @@ liblogging 1.0.6 lynx http://download.rsyslog.com/liblogging/
 libfastjson 0.99.8 lynx http://download.rsyslog.com/libfastjson/
 librelp 1.6.0 lynx http://download.rsyslog.com/librelp/
 curl 7.71.1 lynx https://curl.haxx.se/download/
-libmaxminddb 1.4.2 lynx https://github.com/maxmind/libmaxminddb/releases
+libmaxminddb 1.4.3 lynx https://github.com/maxmind/libmaxminddb/releases
