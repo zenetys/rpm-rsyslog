@@ -1,0 +1,41 @@
+From f4de59acaed174f5c1d94e02f1f979b428f31854 Mon Sep 17 00:00:00 2001
+From: Julien Thomas <jthomas@zenetys.com>
+Date: Mon, 20 Jul 2020 11:21:49 +0200
+Subject: [PATCH] omelasticsearch: fix reply buffer reset after health check
+
+This is a proposal to fix github issue #4127 "omelasticsearch
+failure parsing elasticsearch reply in 8.2001.0".
+
+The issue happens when more than one server is defined on the
+action. On that condition a health check is made through
+checkConn() before sending the POST. The replyLen should be
+set back to 0 after the health check, otherwise the response
+data received from the POST gets appended to the end of the
+last health check.
+---
+ plugins/omelasticsearch/omelasticsearch.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plugins/omelasticsearch/omelasticsearch.c b/plugins/omelasticsearch/omelasticsearch.c
+index 5590a49e2..8fcf92c3f 100644
+--- a/plugins/omelasticsearch/omelasticsearch.c
++++ b/plugins/omelasticsearch/omelasticsearch.c
+@@ -1567,7 +1567,6 @@ curlPost(wrkrInstanceData_t *pWrkrData, uchar *message, int msglen, uchar **tpls
+ 
+ 	PTR_ASSERT_SET_TYPE(pWrkrData, WRKR_DATA_TYPE_ES);
+ 
+-	pWrkrData->replyLen = 0;
+ 	if ((pWrkrData->pData->rebindInterval > -1) &&
+ 		(pWrkrData->nOperations > pWrkrData->pData->rebindInterval)) {
+ 		curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1);
+@@ -1588,6 +1587,7 @@ curlPost(wrkrInstanceData_t *pWrkrData, uchar *message, int msglen, uchar **tpls
+ 		/* needs to be called to support ES HA feature */
+ 		CHKiRet(checkConn(pWrkrData));
+ 	}
++	pWrkrData->replyLen = 0;
+ 	CHKiRet(setPostURL(pWrkrData, tpls));
+ 
+ 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (char *)message);
+-- 
+2.21.1
+

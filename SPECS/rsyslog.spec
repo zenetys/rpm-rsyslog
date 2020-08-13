@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 7%{?dist}.zenetys
+Release: 8%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -47,6 +47,7 @@ Patch0: rsyslog-systemd-centos8.patch
 %endif
 
 Patch100: rsyslog-omelasticsearch-empty-pipeline.patch
+Patch101: rsyslog-omelasticsearch-reply-buffer-reset.patch
 
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
@@ -146,6 +147,7 @@ cd rsyslog-%{version}
 %if 0%{?rhel} >= 7
 %patch0 -p0
 %patch100 -p1
+%patch101 -p1
 %endif
 cd ..
 
