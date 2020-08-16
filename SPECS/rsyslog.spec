@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 8%{?dist}.zenetys
+Release: 9%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -48,6 +48,8 @@ Patch0: rsyslog-systemd-centos8.patch
 
 Patch100: rsyslog-omelasticsearch-empty-pipeline.patch
 Patch101: rsyslog-omelasticsearch-reply-buffer-reset.patch
+Patch102: rsyslog-expose-jsonDeepCopy.patch
+Patch103: rsyslog-rscript-fmunflatten.patch
 
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
@@ -148,6 +150,9 @@ cd rsyslog-%{version}
 %patch0 -p0
 %patch100 -p1
 %patch101 -p1
+%patch102 -p1
+%patch103 -p1
+%patch104 -p1
 %endif
 cd ..
 
@@ -207,6 +212,7 @@ OPTIONS=(
   --enable-regexp
   --enable-fmhash
   --enable-fmhash-xxhash
+  --enable-fmunflatten
   # --enable-gssapi-krb5
   --enable-klog
   --enable-kmsg
@@ -307,6 +313,7 @@ OPTIONS=(
 (
   cd rsyslog-%{version}
   export > config.exports # save environments vars
+  autoreconf -i
   %configure --enable-static=no --enable-shared=yes ${OPTIONS[@]}
   make %{?_smp_mflags} pkglibdir=%{_libdir}/rsyslog
 )
@@ -403,6 +410,7 @@ fi
 %{_libdir}/rsyslog/pmlastmsg.so
 %{_libdir}/rsyslog/fmhash.so
 %{_libdir}/rsyslog/fmhttp.so
+%{_libdir}/rsyslog/fmunflatten.so
 %{_libdir}/rsyslog/imdiag.so
 %{_libdir}/rsyslog/imfile.so
 %{_libdir}/rsyslog/imklog.so
