@@ -89,10 +89,10 @@ Requires(preun): /sbin/service
 Requires(postun): /sbin/service
 %endif
 
+Requires: bash >= 2.0
+Requires: gnutls
 Requires: logrotate >= 3.5.2
 Requires: openssl-libs
-Requires: gnutls
-Requires: bash >= 2.0
 
 Provides: rsyslog
 Provides: rsyslog-elasticsearch
