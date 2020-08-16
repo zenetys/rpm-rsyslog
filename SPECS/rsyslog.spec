@@ -16,13 +16,15 @@
 %endif
 %define libmaxminddb_version    1.4.3
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
+%define libgrok_commit          a52f42b1fa359db2145a70216ec5b4ef43d57b5c
+%define libgrok                 grok-%{libgrok_commit}
 %define builddir                %{_builddir}/%{name}-%{version}
 %define static_only             --enable-static --disable-shared
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 9%{?dist}.zenetys
+Release: 10%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -41,6 +43,7 @@ Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
 %endif
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
+Source403: https://github.com/jordansissel/grok/archive/%{libgrok_commit}.tar.gz#/%{libgrok}.tar.gz
 
 %if 0%{?rhel} >= 7
 Patch0: rsyslog-systemd-centos8.patch
@@ -54,6 +57,9 @@ Patch103: rsyslog-rscript-fmunflatten.patch
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
 Patch202: liblognorm-string-rulebase-bugfix-segfault-when-using-LF-in-jso.patch
+
+Patch300: libgrok-build.patch
+Patch301: libgrok-pcre-capture-format.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -71,9 +77,17 @@ BuildRequires: libuuid-devel
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
+BuildRequires: pkgconfig(glib-2.0)
 BuildRequires: zlib-devel
 
+BuildRequires: gperf
+BuildRequires: libevent-devel
+BuildRequires: pcre-devel
+BuildRequires: rpcgen
+BuildRequires: tokyocabinet-devel
+
 %if 0%{?rhel} >= 8
+BuildRequires: libtirpc-devel
 BuildRequires: pkgconfig(libcurl)
 %endif
 
@@ -91,8 +105,15 @@ Requires(postun): /sbin/service
 
 Requires: bash >= 2.0
 Requires: gnutls
+Requires: libevent
 Requires: logrotate >= 3.5.2
 Requires: openssl-libs
+Requires: pcre >= 7.6
+Requires: tokyocabinet >= 1.4.9
+
+%if 0%{?rhel} >= 8
+Requires: libtirpc
+%endif
 
 Provides: rsyslog
 Provides: rsyslog-elasticsearch
@@ -144,6 +165,7 @@ Rsyslog is an enhanced, multi-threaded syslog daemon.
 %setup -T -D -a 400
 %endif
 %setup -T -D -a 402
+%setup -T -D -a 403
 
 cd rsyslog-%{version}
 %if 0%{?rhel} >= 7
@@ -160,6 +182,11 @@ cd %{liblognorm}
 %patch200 -p1
 %patch201 -p1
 %patch202 -p1
+cd ..
+
+cd %{libgrok}
+%patch300 -p1
+%patch301 -p1
 cd ..
 
 %build
@@ -205,8 +232,17 @@ export CURL_LIBS="%{builddir}/%{libcurl}/lib/.libs/libcurl.a -L%{builddir}/%{lib
 export MAXMINDDB_CFLAGS="-I%{builddir}/%{libmaxminddb}/include"
 export MAXMINDDB_LIBS="%{builddir}/%{libmaxminddb}/src/.libs/libmaxminddb.a -L%{builddir}/%{libmaxminddb}/src/.libs"
 
-export CFLAGS="-fPIC ${LIBNET_CFLAGS} ${MAXMINDDB_CFLAGS}"
-export LIBS="${LIBNET_LIBS} ${MAXMINDDB_LIBS}"
+( cd %{libgrok} && make %{?_smp_mflags} libgrok.a )
+
+libgrok_cflags="-I%{builddir}/%{libgrok}"
+%if 0%{?rhel} >= 8
+libgrok_cflags+=" -I/usr/include/tirpc"
+%endif
+export LIBGROK_CFLAGS="${libgrok_cflags}"
+export LIBGROK_LIBS="%{builddir}/%{libgrok}/libgrok.a -L%{builddir}/%{libgrok}"
+
+export CFLAGS="-fPIC ${LIBNET_CFLAGS} ${MAXMINDDB_CFLAGS} ${LIBGROK_CFLAGS}"
+export LIBS="${LIBNET_LIBS} ${MAXMINDDB_LIBS} ${LIBGROK_LIBS}"
 
 OPTIONS=(
   --enable-regexp
@@ -245,7 +281,7 @@ OPTIONS=(
 
   --enable-mmnormalize
   --enable-mmjsonparse
-  # --enable-mmgrok
+  --enable-mmgrok
   --enable-mmaudit
   --enable-mmanon
   --enable-mmrm1stspace
@@ -439,6 +475,7 @@ fi
 %{_libdir}/rsyslog/mmdblookup.so
 %{_libdir}/rsyslog/mmexternal.so
 %{_libdir}/rsyslog/mmfields.so
+%{_libdir}/rsyslog/mmgrok.so
 %{_libdir}/rsyslog/mmjsonparse.so
 %{_libdir}/rsyslog/mmnormalize.so
 %{_libdir}/rsyslog/mmpstrucdata.so
