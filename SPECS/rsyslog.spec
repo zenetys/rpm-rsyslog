@@ -12,7 +12,7 @@
 %define libfastjson             libfastjson-0.99.8
 %define librelp                 librelp-1.8.0
 %if 0%{?rhel} <= 7
-%define libcurl                 curl-7.71.1
+%define libcurl                 curl-7.72.0
 %endif
 %define libmaxminddb_version    1.4.3
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
@@ -21,8 +21,8 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2006.0
-Release: 13.3%{?dist}.zenetys
+Version: 8.2008.0
+Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -32,6 +32,7 @@ Source11: rsyslog.sysconfig
 Source12: rsyslog.logrotate.systemd
 Source13: rsyslog.logrotate.init
 Source14: rsyslog.init
+Source15: rsyslog.service
 Source300: http://libestr.adiscon.com/files/download/%{libestr}.tar.gz
 Source301: http://www.liblognorm.com/files/download/%{liblognorm}.tar.gz
 Source302: http://download.rsyslog.com/liblogging/%{liblogging}.tar.gz
@@ -42,12 +43,6 @@ Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
 %endif
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 
-%if 0%{?rhel} >= 7
-Patch0: rsyslog-systemd-centos8.patch
-%endif
-
-Patch100: rsyslog-omelasticsearch-empty-pipeline.patch
-Patch101: rsyslog-omelasticsearch-reply-buffer-reset.patch
 Patch102: rsyslog-expose-jsonDeepCopy.patch
 Patch103: rsyslog-rscript-fmunflatten.patch
 Patch104: rsyslog-non-existent-key-creates-parent.patch
@@ -150,11 +145,6 @@ Rsyslog is an enhanced, multi-threaded syslog daemon.
 %setup -T -D -a 402
 
 cd rsyslog-%{version}
-%if 0%{?rhel} >= 7
-%patch0 -p0
-%endif
-%patch100 -p1
-%patch101 -p1
 %patch102 -p1
 %patch103 -p1
 %patch104 -p1
@@ -352,6 +342,7 @@ install -D -p -m 644 %{SOURCE11} %{buildroot}%{_sysconfdir}/sysconfig/rsyslog
 sed -i -e 's/^#imjournal# //' %{buildroot}%{_sysconfdir}/rsyslog.conf
 sed -i -e '/^#imklog# /d' %{buildroot}%{_sysconfdir}/rsyslog.conf
 install -D -p -m 644 %{SOURCE12} %{buildroot}%{_sysconfdir}/logrotate.d/syslog
+install -D -p -m 755 %{SOURCE15} %{buildroot}%{_unitdir}/rsyslog.service
 %else
 sed -i -e '/^#imjournal# /d' %{buildroot}%{_sysconfdir}/rsyslog.conf
 sed -i -e 's/^#imklog# //' %{buildroot}%{_sysconfdir}/rsyslog.conf
