@@ -1,0 +1,74 @@
+From a4640638440a00ee68e6d8f8af59fdf0ceb8a1e6 Mon Sep 17 00:00:00 2001
+From: Julien Thomas <jthomas@zenetys.com>
+Date: Wed, 23 Sep 2020 20:33:55 +0200
+Subject: [PATCH] Do not create empty objects when accessing non-existent keys
+
+This is a proposal for Github issue rsyslog/rsyslog#4430:
+accessing a non-existing key creates an empty parent object
+https://github.com/rsyslog/rsyslog/issues/4430
+
+When looking up an object property, the tree of intermediate
+object containers was ceated by get and del functions. The
+patch is an attempt to fix that behavior by passing 0 to the
+bCreate argument of jsonPathFindParent().
+
+There is also one case where the return value of
+jsonPathFindParent() was not checked, in the recurssive call
+of jsonPathFindParent() itself. This was leading to infinite
+loops if bCreate was 0.
+---
+ runtime/msg.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/runtime/msg.c b/runtime/msg.c
+index 3acc4f212..b28cf84c5 100644
+--- a/runtime/msg.c
++++ b/runtime/msg.c
+@@ -3142,7 +3142,7 @@ getJSONPropVal(smsg_t * const pMsg, msgPropDescr_t *pProp, uchar **pRes, rs_size
+ 		field = *jroot;
+ 	} else {
+ 		leaf = jsonPathGetLeaf(pProp->name, pProp->nameLen);
+-		CHKiRet(jsonPathFindParent(*jroot, pProp->name, leaf, &parent, 1));
++		CHKiRet(jsonPathFindParent(*jroot, pProp->name, leaf, &parent, 0));
+ 		if(jsonVarExtract(parent, (char*)leaf, &field) == FALSE)
+ 			field = NULL;
+ 	}
+@@ -3197,7 +3197,7 @@ msgGetJSONPropJSONorString(smsg_t * const pMsg, msgPropDescr_t *pProp, struct js
+ 		ABORT_FINALIZE(RS_RET_NOT_FOUND);
+ 	}
+ 	leaf = jsonPathGetLeaf(pProp->name, pProp->nameLen);
+-	CHKiRet(jsonPathFindParent(*jroot, pProp->name, leaf, &parent, 1));
++	CHKiRet(jsonPathFindParent(*jroot, pProp->name, leaf, &parent, 0));
+ 	if(jsonVarExtract(parent, (char*)leaf, pjson) == FALSE) {
+ 		ABORT_FINALIZE(RS_RET_NOT_FOUND);
+ 	}
+@@ -3242,7 +3242,7 @@ msgGetJSONPropJSON(smsg_t * const pMsg, msgPropDescr_t *pProp, struct json_objec
+ 		FINALIZE;
+ 	}
+ 	leaf = jsonPathGetLeaf(pProp->name, pProp->nameLen);
+-	CHKiRet(jsonPathFindParent(*jroot, pProp->name, leaf, &parent, 1));
++	CHKiRet(jsonPathFindParent(*jroot, pProp->name, leaf, &parent, 0));
+ 	if(jsonVarExtract(parent, (char*)leaf, pjson) == FALSE) {
+ 		ABORT_FINALIZE(RS_RET_NOT_FOUND);
+ 	}
+@@ -4845,7 +4845,7 @@ jsonPathFindParent(struct json_object *jroot, uchar *name, uchar *leaf, struct j
+ 	namestart = name;
+ 	*parent = jroot;
+ 	while(name < leaf-1) {
+-		jsonPathFindNext(*parent, namestart, &name, leaf, parent, bCreate);
++		CHKiRet(jsonPathFindNext(*parent, namestart, &name, leaf, parent, bCreate));
+ 	}
+ 	if(*parent == NULL)
+ 		ABORT_FINALIZE(RS_RET_NOT_FOUND);
+@@ -5006,7 +5006,7 @@ msgDelJSON(smsg_t * const pM, uchar *name)
+ 		*jroot = NULL;
+ 	} else {
+ 		leaf = jsonPathGetLeaf(name, ustrlen(name));
+-		CHKiRet(jsonPathFindParent(*jroot, name, leaf, &parent, 1));
++		CHKiRet(jsonPathFindParent(*jroot, name, leaf, &parent, 0));
+ 		if(jsonVarExtract(parent, (char*)leaf, &leafnode) == FALSE)
+ 			leafnode = NULL;
+ 		if(leafnode == NULL) {
+-- 
+2.21.1
+
