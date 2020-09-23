@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 12%{?dist}.zenetys
+Release: 13%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -299,7 +299,7 @@ OPTIONS=(
   # --enable-mmkubernetes
 
   --enable-omhttp
-  --enable-omfile-hardened
+  #--enable-omfile-hardened
   --enable-relp
   --enable-omrelp-default-port
   # --enable-ksi-ls12
@@ -487,7 +487,6 @@ fi
 %{_libdir}/rsyslog/mmsequence.so
 %{_libdir}/rsyslog/mmsnmptrapd.so
 %{_libdir}/rsyslog/mmutf8fix.so
-%{_libdir}/rsyslog/omfile-hardened.so
 %{_libdir}/rsyslog/omhttp.so
 %{_libdir}/rsyslog/ommail.so
 %{_libdir}/rsyslog/omprog.so
