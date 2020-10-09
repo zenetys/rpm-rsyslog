@@ -1,0 +1,40 @@
+From e5dc93e076f0c9ba9458b3c634bbf2b5d53201e2 Mon Sep 17 00:00:00 2001
+From: Julien Thomas <jthomas@zenetys.com>
+Date: Fri, 9 Oct 2020 21:18:01 +0200
+Subject: [PATCH 1/2] msg: segfault in jsonPathFindNext() when <root> is not an
+ object
+
+The segfault gets happens when <bCreate> is 1 and when the <root>
+container where to insert the <namebuf> key is not an object.
+
+Here is simple reproducible test case:
+
+// ensure we start fresh
+// unnecessary if there was no previous set
+unset $!;
+
+set $! = "";
+set $!event!created = 123;
+---
+ runtime/msg.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/runtime/msg.c b/runtime/msg.c
+index ebb9fdd6d..8e86d2944 100644
+--- a/runtime/msg.c
++++ b/runtime/msg.c
+@@ -4826,6 +4826,11 @@ jsonPathFindNext(struct json_object *root, uchar *namestart, uchar **name, uchar
+ 		if(!bCreate) {
+ 			ABORT_FINALIZE(RS_RET_JNAME_INVALID);
+ 		} else {
++			if (json_object_get_type(root) != json_type_object) {
++				DBGPRINTF("jsonPathFindNext with bCreate: not a container in json path, "
++					"name is '%s'\n", namestart);
++				ABORT_FINALIZE(RS_RET_INVLD_SETOP);
++			}
+ 			json = json_object_new_object();
+ 			json_object_object_add(root, (char*)namebuf, json);
+ 		}
+-- 
+2.21.1
+

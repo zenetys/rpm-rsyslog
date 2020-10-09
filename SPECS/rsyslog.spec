@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 13%{?dist}.zenetys
+Release: 13.1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -54,6 +54,8 @@ Patch101: rsyslog-omelasticsearch-reply-buffer-reset.patch
 Patch102: rsyslog-expose-jsonDeepCopy.patch
 Patch103: rsyslog-rscript-fmunflatten.patch
 Patch104: rsyslog-non-existent-key-creates-parent.patch
+Patch105: rsyslog-msg-segfault-may-occur-in-jsonPathFindNext-when-root.patch
+Patch106: rsyslog-msg-memory-leak-in-msgAddJSON-if-jsonPathFindParent-failed.patch
 
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
@@ -177,6 +179,8 @@ cd rsyslog-%{version}
 %patch102 -p1
 %patch103 -p1
 %patch104 -p1
+%patch105 -p1
+%patch106 -p1
 %endif
 cd ..
 
