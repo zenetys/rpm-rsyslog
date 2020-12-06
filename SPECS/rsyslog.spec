@@ -152,6 +152,7 @@ Rsyslog is an enhanced, multi-threaded syslog daemon.
 cd rsyslog-%{version}
 %if 0%{?rhel} >= 7
 %patch0 -p0
+%endif
 %patch100 -p1
 %patch101 -p1
 %patch102 -p1
@@ -159,7 +160,6 @@ cd rsyslog-%{version}
 %patch104 -p1
 %patch105 -p1
 %patch106 -p1
-%endif
 cd ..
 
 cd %{liblognorm}
