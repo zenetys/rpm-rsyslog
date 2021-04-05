@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2102.0
-Release: 3%{?dist}.zenetys
+Release: 4%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -88,7 +88,12 @@ Requires(postun): /sbin/service
 Requires: bash >= 2.0
 Requires: gnutls
 Requires: logrotate >= 3.5.2
+
+%if 0%{?rhel} >= 7
 Requires: openssl-libs
+%else
+Requires: openssl
+%endif
 
 Provides: rsyslog
 Provides: rsyslog-elasticsearch
