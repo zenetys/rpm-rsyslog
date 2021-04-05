@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2102.0
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -100,6 +100,7 @@ Provides: rsyslog-mmfields
 Provides: rsyslog-mmjsonparse
 Provides: rsyslog-mmnormalize
 Provides: rsyslog-mmrm1stspace
+Provides: rsyslog-mysql
 Provides: rsyslog-omhttp
 Provides: rsyslog-openssl
 Provides: rsyslog-pmciscoios
@@ -118,6 +119,7 @@ Obsoletes: rsyslog-mmfields
 Obsoletes: rsyslog-mmjsonparse
 Obsoletes: rsyslog-mmnormalize
 Obsoletes: rsyslog-mmrm1stspace
+Obsoletes: rsyslog-mysql
 Obsoletes: rsyslog-omhttp
 Obsoletes: rsyslog-openssl
 Obsoletes: rsyslog-pmciscoios
@@ -128,6 +130,35 @@ Obsoletes: syslog
 
 %description
 Rsyslog is an enhanced, multi-threaded syslog daemon.
+
+%package mysql
+Summary: MySQL support for rsyslog
+Group: System Environment/Daemons
+Requires: %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
+# mysql_config is required by rsyslog configure script
+%if 0%{?rhel} >= 8
+# on el8, mariadb-connector-c-devel contains mysql_config;
+# dependencies install libs and headers; mysql is still available
+# via stream but mariadb should be preferred.
+BuildRequires: mariadb-connector-c-devel
+%else
+%if 0%{?rhel} == 7
+# on el7, mariadb-devel (which provides mysql-devel) contains
+# mysql_config; dependencies install libs and headers
+BuildRequires: mariadb-devel
+%else
+%if 0%{?rhel} <= 6
+# on el6, mysql contains the libs and mysql_config but does not
+# depends on the headers so we need mysql-devel as well
+BuildRequires: mysql
+BuildRequires: mysql-devel
+%endif
+%endif
+%endif
+
+%description mysql
+The rsyslog-mysql package contains a dynamic shared object that will add
+MySQL database support to rsyslog.
 
 %prep
 %setup -c %{name}-%{version}
@@ -216,7 +247,7 @@ OPTIONS=(
   # --enable-valgrind
   --enable-diagtools
   --enable-usertools
-  # --enable-mysql
+  --enable-mysql
   # --enable-pgsql
   # --enable-libdbi
   --enable-snmp
@@ -470,3 +501,6 @@ fi
 %{_initrddir}/rsyslog
 %endif
 %dir %{_var}/lib/rsyslog
+
+%files mysql
+%{_libdir}/rsyslog/ommysql.so
