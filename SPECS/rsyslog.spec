@@ -12,7 +12,7 @@
 %define libfastjson             libfastjson-0.99.9
 %define librelp                 librelp-1.10.0
 %if 0%{?rhel} <= 7
-%define libcurl                 curl-7.76.0
+%define libcurl                 curl-7.76.1
 %endif
 %define libmaxminddb_version    1.5.2
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2102.0
-Release: 4%{?dist}.zenetys
+Release: 5%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -50,6 +50,10 @@ Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
 Patch202: liblognorm-string-rulebase-bugfix-segfault-when-using-LF-in-jso.patch
 Patch203: liblognorm-custom-type-memory-leak.patch
+
+%if 0%{?rhel} <= 7
+Patch400: curl-vtls-openssl-in-undeclared.patch
+%endif
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -174,6 +178,7 @@ MySQL database support to rsyslog.
 %setup -T -D -a 304
 %if 0%{?rhel} <= 7
 %setup -T -D -a 400
+%patch400 -p0
 %endif
 %setup -T -D -a 402
 
