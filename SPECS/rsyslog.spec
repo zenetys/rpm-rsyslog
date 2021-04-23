@@ -21,8 +21,8 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2102.0
-Release: 5%{?dist}.zenetys
+Version: 8.2104.0
+Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -42,9 +42,6 @@ Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
 %endif
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
-
-Patch102: rsyslog-expose-jsonDeepCopy.patch
-Patch103: rsyslog-rscript-fmunflatten.patch
 
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
@@ -183,8 +180,7 @@ MySQL database support to rsyslog.
 %setup -T -D -a 402
 
 cd rsyslog-%{version}
-%patch102 -p1
-%patch103 -p1
+# rsyslog patches
 cd ..
 
 cd %{liblognorm}
