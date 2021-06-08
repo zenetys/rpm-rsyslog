@@ -12,7 +12,7 @@
 %define libfastjson             libfastjson-0.99.9
 %define librelp                 librelp-1.10.0
 %if 0%{?rhel} <= 7
-%define libcurl                 curl-7.76.1
+%define libcurl                 curl-7.77.0
 %endif
 %define libmaxminddb_version    1.6.0
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2104.0
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -49,7 +49,7 @@ Patch202: liblognorm-string-rulebase-bugfix-segfault-when-using-LF-in-jso.patch
 Patch203: liblognorm-custom-type-memory-leak.patch
 
 %if 0%{?rhel} <= 7
-Patch400: curl-vtls-openssl-in-undeclared.patch
+# curl patches
 %endif
 
 URL: http://www.rsyslog.com/
@@ -175,7 +175,7 @@ MySQL database support to rsyslog.
 %setup -T -D -a 304
 %if 0%{?rhel} <= 7
 %setup -T -D -a 400
-%patch400 -p0
+# curl patches
 %endif
 %setup -T -D -a 402
 
@@ -222,7 +222,7 @@ export RELP_CFLAGS="-I%{builddir}/%{librelp}/src"
 export RELP_LIBS="%{builddir}/%{librelp}/src/.libs/librelp.a -L%{builddir}/%{librelp}/src/.libs -lgnutls -lssl -lcrypto"
 
 %if 0%{?rhel} <= 7
-( cd %{libcurl} && %configure %{static_only} && make %{?_smp_mflags} )
+( cd %{libcurl} && %configure --with-openssl %{static_only} && make %{?_smp_mflags} )
 
 export CURL_CFLAGS="-I%{builddir}/%{libcurl}/include"
 export CURL_LIBS="%{builddir}/%{libcurl}/lib/.libs/libcurl.a -L%{builddir}/%{libcurl}/lib/.libs -lz -lssl -lcrypto"
