@@ -16,12 +16,14 @@
 %endif
 %define libmaxminddb_version    1.6.0
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
+%define civetweb_version        1.15
+%define civetweb                civetweb-%{civetweb_version}
 %define builddir                %{_builddir}/%{name}-%{version}
 %define static_only             --enable-static --disable-shared
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2106.0
+Version: 8.2110.0
 Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
@@ -42,6 +44,8 @@ Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
 %endif
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
+Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
+
 
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
@@ -56,6 +60,7 @@ URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
 Packager: Benoit DOLEZ <bdolez@zenetys.com>
 
+BuildRequires: apr-util-devel
 BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: bison
@@ -178,6 +183,7 @@ MySQL database support to rsyslog.
 # curl patches
 %endif
 %setup -T -D -a 402
+%setup -T -D -a 403
 
 cd rsyslog-%{version}
 # rsyslog patches
@@ -233,8 +239,19 @@ export CURL_LIBS="%{builddir}/%{libcurl}/lib/.libs/libcurl.a -L%{builddir}/%{lib
 export MAXMINDDB_CFLAGS="-I%{builddir}/%{libmaxminddb}/include"
 export MAXMINDDB_LIBS="%{builddir}/%{libmaxminddb}/src/.libs/libmaxminddb.a -L%{builddir}/%{libmaxminddb}/src/.libs"
 
-export CFLAGS="-fPIC ${LIBNET_CFLAGS} ${MAXMINDDB_CFLAGS}"
-export LIBS="${LIBNET_LIBS} ${MAXMINDDB_LIBS}"
+civetweb_make_opts=()
+%if 0%{?rhel} <= 7
+  civetweb_make_opts+=( WITH_OPENSSL_API_1_0=1 )
+%endif
+( cd %{civetweb} && make lib "${civetweb_make_opts[@]}" %{?_smp_mflags} )
+
+export CIVETWEB_CFLAGS="-I%{builddir}/%{civetweb}/include"
+export CIVETWEB_LIBS="%{builddir}/%{civetweb}/libcivetweb.a -L%{builddir}/%{civetweb}"
+
+export CFLAGS="-fPIC ${LIBNET_CFLAGS} ${MAXMINDDB_CFLAGS} ${CIVETWEB_CFLAGS}"
+export LIBS="${LIBNET_LIBS} ${MAXMINDDB_LIBS} ${CIVETWEB_LIBS}"
+
+env |grep -E 'CFLAG|LIBS' |sort >&2
 
 OPTIONS=(
   --enable-regexp
@@ -299,6 +316,7 @@ OPTIONS=(
   # --enable-helgrind
   --enable-imdiag
   --enable-imfile
+  --enable-imhttp
   --enable-improg
   # --enable-imsolaris
   --enable-imptcp
@@ -442,6 +460,7 @@ fi
 %{_libdir}/rsyslog/fmunflatten.so
 %{_libdir}/rsyslog/imdiag.so
 %{_libdir}/rsyslog/imfile.so
+%{_libdir}/rsyslog/imhttp.so
 %{_libdir}/rsyslog/imklog.so
 %{_libdir}/rsyslog/imkmsg.so
 %{_libdir}/rsyslog/immark.so
