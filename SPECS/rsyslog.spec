@@ -22,7 +22,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2006.0
-Release: 13.3%{?dist}.zenetys
+Release: 13.4%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -53,6 +53,8 @@ Patch103: rsyslog-rscript-fmunflatten.patch
 Patch104: rsyslog-non-existent-key-creates-parent.patch
 Patch105: rsyslog-msg-segfault-may-occur-in-jsonPathFindNext-when-root.patch
 Patch106: rsyslog-msg-memory-leak-in-msgAddJSON-if-jsonPathFindParent-failed.patch
+Patch107: rsyslog-imptcp-set-OS-worker-thread-name.patch
+Patch108: rsyslog-net-bugfix-potential-buffer-overrun.patch
 
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
@@ -74,6 +76,7 @@ BuildRequires: libtool
 BuildRequires: libuuid-devel
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
+BuildRequires: patchutils
 BuildRequires: pkgconfig
 BuildRequires: zlib-devel
 
@@ -160,6 +163,8 @@ cd rsyslog-%{version}
 %patch104 -p1
 %patch105 -p1
 %patch106 -p1
+%patch107 -p1
+filterdiff -p1 -x contrib/imhttp/imhttp.c %{PATCH108} |patch -p1
 cd ..
 
 cd %{liblognorm}

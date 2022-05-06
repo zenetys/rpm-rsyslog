@@ -1,0 +1,66 @@
+From 0f437fba5d2c183126f0b3143f0167c0d2a59aea Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Tue, 3 May 2022 13:04:43 +0200
+Subject: [PATCH] imptcp: set OS worker thread name
+
+We now set the worker thread names to "imptcp/<thrd nbr>" where
+<thrd nbr> is the numerical index (0, 1, ...) of the worker thread.
+This enables to distinguish individual worker threads in OS tools like
+htop. That is useful for performance testing and system monitoring.
+
+The choosen name format is consistant with other similar thread
+names inside rsyslog. For imptcp, worker threads were not yet
+given individual names.
+
+Note: "in:imptcp" is imptcp's "main" thread, which also is used
+as a worker in some scenarios. This name was not modified.
+---
+ plugins/imptcp/imptcp.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/plugins/imptcp/imptcp.c b/plugins/imptcp/imptcp.c
+index 2df46a236c..2ec504b525 100644
+--- a/plugins/imptcp/imptcp.c
++++ b/plugins/imptcp/imptcp.c
+@@ -59,6 +59,9 @@
+ #if HAVE_FCNTL_H
+ #include <fcntl.h>
+ #endif
++#ifdef HAVE_SYS_PRCTL_H
++#  include <sys/prctl.h>
++#endif
+ #include "rsyslog.h"
+ #include "cfsysline.h"
+ #include "prop.h"
+@@ -346,6 +349,7 @@ struct ptcplstn_s {
+ static struct wrkrInfo_s {
+ 	pthread_t tid;	/* the worker's thread ID */
+ 	long long unsigned numCalled;	/* how often was this called */
++	int wrkrIdx;	/* index for this worker - shortcut for thread name */
+ } *wrkrInfo;
+ static int wrkrRunning;
+ 
+@@ -1833,6 +1837,7 @@ startWorkerPool(void)
+ 	}
+ 	for(i = 0 ; i < runModConf->wrkrMax ; ++i) {
+ 		/* init worker info structure! */
++		wrkrInfo[i].wrkrIdx = i;
+ 		wrkrInfo[i].numCalled = 0;
+ 		pthread_create(&wrkrInfo[i].tid, &wrkrThrdAttr, wrkr, &(wrkrInfo[i]));
+ 	}
+@@ -2121,6 +2126,15 @@ wrkr(void *myself)
+ 	++wrkrRunning;
+ 	pthread_mutex_unlock(&io_q.mut);
+ 
++	uchar thrdName[32];
++	snprintf((char*)thrdName, sizeof(thrdName), "imptcp/w%d", me->wrkrIdx);
++#	if defined(HAVE_PRCTL) && defined(PR_SET_NAME)
++	/* set thread name - we ignore if the call fails, has no harsh consequences... */
++	if(prctl(PR_SET_NAME, thrdName, 0, 0, 0) != 0) {
++		DBGPRINTF("prctl failed, not setting thread name for '%s'\n", thrdName);
++	}
++#	endif
++
+ 	io_req_t *n;
+ 	while(1) {
+ 		n = NULL;
