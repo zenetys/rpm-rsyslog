@@ -1,0 +1,60 @@
+From b16b0b2f32f17987a9b9a01587c9cc2436b50e27 Mon Sep 17 00:00:00 2001
+From: Julien Thomas <jthomas@zenetys.com>
+Date: Wed, 24 Aug 2022 17:57:24 +0200
+Subject: [PATCH] string: fix out of bound access in perm_chars causing
+ segfault
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+In struct data_String, the perm_chars member is declared as
+an array indexed from 0 to 255:
+
+    char perm_chars[256];
+
+Bytes > 127, for instance with UTF-8 data, cause a segfault.
+I believe casting as (unsigned char) instead of (unsigned) should
+ensure the perm_chars is accessed at index 0..255.
+
+I came this segfault with the following string sample. Rsyslog crashes
+in stringIsPermittedChar() when it processes char byte 0xe2.
+
+echo 'd’ouverture' |od -t x1 -a
+0000000  64  e2  80  99  6f  75  76  65  72  74  75  72  65  0a
+          d   b nul  em   o   u   v   e   r   t   u   r   e  nl
+0000016
+
+Note line numbers in parser.c reported by gdb are wrong with master
+because it is from a 2.0.6 version with other patches:
+
+#0  0x00007f9a73034713 in stringIsPermittedChar (data=0x55bd3a1a42a0, c=-30 '\342') at parser.c:3236
+#1  0x00007f9a73034c63 in ln_v2_parseString (npb=0x7f9a5292d670, offs=0x7f9a5292d600, pdata=0x55bd3a1a42a0, parsed=0x7f9a5292d5f8, value=0x7f9a5292d5f0) at parser.c:3363
+#2  0x00007f9a73029279 in tryParser (npb=0x7f9a5292d670, dag=0x55bd3a1a11a0, offs=0x7f9a5292d600, pParsed=0x7f9a5292d5f8, value=0x7f9a5292d5f0, prs=0x55bd3a14ea00) at pdag.c:1454
+#3  0x00007f9a730295db in ln_normalizeRec (npb=0x7f9a5292d670, dag=0x55bd3a1a11a0, offs=0, bPartialMatch=0, json=0x7f9a4c4dd260, endNode=0x7f9a5292d6a0) at pdag.c:1575
+#4  0x00007f9a730299ac in ln_normalize (ctx=0x55bd3a14e680, str=0x7f9a4c4e19a0 "d’ouverture de session :#011#011{837B856E-32B3-78E2-3D77-4E95F8904E71}#015#012#015#012Informations sur le processus :#015#012#011ID du processus :#011#0110x0#015#012#011Nom du processus :#011#01"..., strLen=8021, json_p=0x7f9a5292d6d8) at pdag.c:1653
+#5  0x00007f9a7302459e in doAction (pMsgData=0x7f9a5292d740, pWrkrData=0x7f9a4c4daad0) at mmnormalize.c:259
+...
+
+This should fix issue rsyslog/liblognorm#340 "UTF-8 accentuated
+characters causing segfault". The patch in this pull request is
+also similar.
+---
+ src/parser.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/parser.c b/src/parser.c
+index 2d70424..4dde7cb 100644
+--- a/src/parser.c
++++ b/src/parser.c
+@@ -3382,7 +3382,7 @@ stringSetPermittedChar(struct data_String *const data, char c, int val)
+ static inline int
+ stringIsPermittedChar(struct data_String *const data, char c)
+ {
+-	return data->perm_chars[(unsigned)c];
++	return data->perm_chars[(unsigned char)c];
+ }
+ static void
+ stringAddPermittedCharArr(struct data_String *const data,
+-- 
+2.21.1
+

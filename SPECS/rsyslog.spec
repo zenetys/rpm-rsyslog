@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2208.0
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -54,6 +54,7 @@ Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
 Patch202: liblognorm-string-rulebase-bugfix-segfault-when-using-LF-in-jso.patch
 Patch203: liblognorm-custom-type-memory-leak.patch
+Patch204: liblognorm-string-perm-chars-overflow.patch
 
 %if 0%{?rhel} <= 7
 # curl patches
@@ -200,10 +201,11 @@ cd %{liblognorm}
 %patch201 -p1
 %patch202 -p1
 %patch203 -p1
+%patch204 -p1
 cd ..
 
 %build
-export CFLAGS="-fPIC"
+export CFLAGS="-fPIC -g"
 
 ( cd %{libestr} && %configure %{static_only} && make %{?_smp_mflags} )
 
