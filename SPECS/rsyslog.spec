@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2208.0
-Release: 9%{?dist}.zenetys
+Release: 10%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -209,70 +209,120 @@ rsyslog_configure_cflags='-fPIC -g'
 rsyslog_configure_ldflags=
 rsyslog_configure_opts=()
 rsyslog_make_opts=()
+libestr_configure_cflags='-fPIC -g'
+libfastjson_configure_cflags='-fPIC -g'
+liblognorm_configure_cflags='-fPIC -g'
 liblognorm_configure_opts=()
+liblogging_configure_cflags='-fPIC -g'
+librelp_configure_cflags='-fPIC -g'
+libcurl_configure_cflags='-fPIC -g'
+libmaxminddb_configure_cflags='-fPIC -g'
+civetweb_cflags='-fPIC -g'
+civetweb_make_opts=()
 
-export CFLAGS="-fPIC -g"
-
-( cd %{libestr} && %configure %{static_only} && make %{?_smp_mflags} )
-
+# libestr
+(
+    cd %{libestr} &&
+    %configure %{static_only} &&
+    %configure %{static_only} \
+        "CFLAGS=${libestr_configure_cflags}" &&
+    make %{?_smp_mflags}
+)
 rsyslog_configure_opts+=( LIBESTR_CFLAGS="-I%{builddir}/%{libestr}/include" )
 rsyslog_configure_opts+=( LIBESTR_LIBS="-L%{builddir}/%{libestr}/src/.libs -lestr" )
 liblognorm_configure_opts+=( LIBESTR_CFLAGS="-I%{builddir}/%{libestr}/include" )
 liblognorm_configure_opts+=( LIBESTR_LIBS="-L%{builddir}/%{libestr}/src/.libs -lestr" )
 
-( cd %{libfastjson} && %configure %{static_only} && make %{?_smp_mflags} )
-
+# libfastjson
+(
+    cd %{libfastjson} &&
+    %configure %{static_only} \
+        "CFLAGS=${libfastjson_configure_cflags}" &&
+    make %{?_smp_mflags}
+)
 rsyslog_configure_opts+=( LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}" )
 rsyslog_configure_opts+=( LIBFASTJSON_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
 liblognorm_configure_opts+=( LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}" )
 liblognorm_configure_opts+=( LIBFASTJSON_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
-
+# some components may uses JSON_C variables instead
 rsyslog_configure_opts+=( JSON_C_CFLAGS="-I%{builddir}/%{libfastjson}" )
 rsyslog_configure_opts+=( JSON_C_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
 liblognorm_configure_opts+=( JSON_C_CFLAGS="-I%{builddir}/%{libfastjson}" )
 liblognorm_configure_opts+=( JSON_C_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
 
-( cd %{liblognorm} && %configure %{static_only} "${liblognorm_configure_opts[@]}" && make %{?_smp_mflags} )
-
+# liblognorm
+(
+    cd %{liblognorm} &&
+    %configure %{static_only} \
+        "CFLAGS=${liblognorm_configure_cflags}" \
+        "${liblognorm_configure_opts[@]}" &&
+    make %{?_smp_mflags}
+)
 rsyslog_configure_opts+=( LIBLOGNORM_CFLAGS="-I%{builddir}/%{liblognorm}/src" )
 rsyslog_configure_opts+=( LIBLOGNORM_LIBS="-L%{builddir}/%{liblognorm}/src/.libs -llognorm" )
 
-( cd %{liblogging} && %configure %{static_only} && make %{?_smp_mflags} )
-
+# liblogging-stdlog
+(
+    cd %{liblogging} &&
+    %configure %{static_only} \
+        "CFLAGS=${liblogging_configure_cflags}" &&
+    make %{?_smp_mflags}
+)
 rsyslog_configure_opts+=( LIBLOGGING_STDLOG_CFLAGS="-I%{builddir}/%{liblogging}/stdlog" )
 rsyslog_configure_opts+=( LIBLOGGING_STDLOG_LIBS="-L%{builddir}/%{liblogging}/stdlog/.libs -llogging-stdlog" )
 
-( cd %{librelp} && %configure %{static_only} && make %{?_smp_mflags} )
-
+# librelp
+(
+    cd %{librelp} &&
+    %configure %{static_only} \
+        "CFLAGS=${librelp_configure_cflags}" &&
+    make %{?_smp_mflags}
+)
 rsyslog_configure_opts+=( RELP_CFLAGS="-I%{builddir}/%{librelp}/src" )
 rsyslog_configure_opts+=( RELP_LIBS="-L%{builddir}/%{librelp}/src/.libs -lrelp -lgnutls -lssl -lcrypto" )
 
+# libcurl
 %if 0%{?rhel} <= 7
-( cd %{libcurl} && %configure --with-openssl --disable-ldap --disable-ldaps %{static_only} && make %{?_smp_mflags} )
-
+(
+    cd %{libcurl} &&
+    %configure %{static_only} \
+        --with-openssl \
+        --disable-ldap \
+        --disable-ldaps \
+        "CFLAGS=${libcurl_configure_cflags}" &&
+    make %{?_smp_mflags}
+)
 rsyslog_configure_opts+=( CURL_CFLAGS="-I%{builddir}/%{libcurl}/include" )
 rsyslog_configure_opts+=( CURL_LIBS="-L%{builddir}/%{libcurl}/lib/.libs -lcurl -lz -lssl -lcrypto" )
 %endif
 
-( cd %{libmaxminddb} && %configure %{static_only} && make %{?_smp_mflags} )
-
+# libmaxminddb
+(
+    cd %{libmaxminddb} &&
+    %configure %{static_only} \
+        "CFLAGS=${libmaxminddb_configure_cflags}" &&
+    make %{?_smp_mflags}
+)
 rsyslog_configure_cflags+=" -I%{builddir}/%{libmaxminddb}/include"
 rsyslog_configure_ldflags+=" -L%{builddir}/%{libmaxminddb}/src/.libs"
 
-civetweb_make_opts=( COPT='-DNO_SSL_DL' )
+# civetweb
+civetweb_make_opts+=( COPT='-DNO_SSL_DL' )
+civetweb_make_opts+=( WITH_CFLAGS="$civetweb_cflags" )
 %if 0%{?rhel} <= 7
-  civetweb_make_opts+=( WITH_OPENSSL_API_1_0=1 )
+civetweb_make_opts+=( WITH_OPENSSL_API_1_0=1 )
 %endif
-( cd %{civetweb} && make lib "${civetweb_make_opts[@]}" %{?_smp_mflags} )
-
+(
+    cd %{civetweb} &&
+    make lib %{?_smp_mflags} \
+        "${civetweb_make_opts[@]}"
+)
 rsyslog_configure_cflags+=" -I%{builddir}/%{civetweb}/include"
 rsyslog_make_opts+=( CIVETWEB_LIBS="-L%{builddir}/%{civetweb} -lcivetweb -lssl -lcrypto" )
 
 # apr-util pkgconfig file gives -lldap_r in ldflags, it introduces
 # a useless dependency, so force APU_LIBS to overcome that issue
-export APU_LIBS='-laprutil-1'
-
-env |grep -E 'CFLAG|LIBS' |sort >&2
+rsyslog_configure_opts+=( APU_LIBS='-laprutil-1' )
 
 OPTIONS=(
   --enable-regexp
