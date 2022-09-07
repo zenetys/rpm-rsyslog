@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2208.0
-Release: 8%{?dist}.zenetys
+Release: 9%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -209,31 +209,38 @@ rsyslog_configure_cflags='-fPIC -g'
 rsyslog_configure_ldflags=
 rsyslog_configure_opts=()
 rsyslog_make_opts=()
+liblognorm_configure_opts=()
 
 export CFLAGS="-fPIC -g"
 
 ( cd %{libestr} && %configure %{static_only} && make %{?_smp_mflags} )
 
-export LIBESTR_CFLAGS="-I%{builddir}/%{libestr}/include"
-export LIBESTR_LIBS="%{builddir}/%{libestr}/src/.libs/libestr.a -L%{builddir}/%{libestr}/src/.libs/"
+rsyslog_configure_opts+=( LIBESTR_CFLAGS="-I%{builddir}/%{libestr}/include" )
+rsyslog_configure_opts+=( LIBESTR_LIBS="-L%{builddir}/%{libestr}/src/.libs -lestr" )
+liblognorm_configure_opts+=( LIBESTR_CFLAGS="-I%{builddir}/%{libestr}/include" )
+liblognorm_configure_opts+=( LIBESTR_LIBS="-L%{builddir}/%{libestr}/src/.libs -lestr" )
 
 ( cd %{libfastjson} && %configure %{static_only} && make %{?_smp_mflags} )
 
-export LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}"
-export LIBFASTJSON_LIBS="%{builddir}/%{libfastjson}/.libs/libfastjson.a -L%{builddir}/%{libfastjson}/.libs/"
+rsyslog_configure_opts+=( LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}" )
+rsyslog_configure_opts+=( LIBFASTJSON_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
+liblognorm_configure_opts+=( LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}" )
+liblognorm_configure_opts+=( LIBFASTJSON_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
 
-export JSON_C_CFLAGS="-I%{builddir}/%{libfastjson}"
-export JSON_C_LIBS="%{builddir}/%{libfastjson}/.libs/libfastjson.a -L%{builddir}/%{libfastjson}/.libs/"
+rsyslog_configure_opts+=( JSON_C_CFLAGS="-I%{builddir}/%{libfastjson}" )
+rsyslog_configure_opts+=( JSON_C_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
+liblognorm_configure_opts+=( JSON_C_CFLAGS="-I%{builddir}/%{libfastjson}" )
+liblognorm_configure_opts+=( JSON_C_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
 
-( cd %{liblognorm} && %configure %{static_only} && make %{?_smp_mflags} )
+( cd %{liblognorm} && %configure %{static_only} "${liblognorm_configure_opts[@]}" && make %{?_smp_mflags} )
 
-export LIBLOGNORM_CFLAGS="-I%{builddir}/%{liblognorm}/src"
-export LIBLOGNORM_LIBS="%{builddir}/%{liblognorm}/src/.libs/liblognorm.a -L%{builddir}/%{liblognorm}/src/.libs"
+rsyslog_configure_opts+=( LIBLOGNORM_CFLAGS="-I%{builddir}/%{liblognorm}/src" )
+rsyslog_configure_opts+=( LIBLOGNORM_LIBS="-L%{builddir}/%{liblognorm}/src/.libs -llognorm" )
 
 ( cd %{liblogging} && %configure %{static_only} && make %{?_smp_mflags} )
 
-export LIBLOGGING_STDLOG_CFLAGS="-I%{builddir}/%{liblogging}/stdlog"
-export LIBLOGGING_STDLOG_LIBS="%{builddir}/%{liblogging}/stdlog/.libs/liblogging-stdlog.a -L%{builddir}/%{liblogging}/stdlog/.libs"
+rsyslog_configure_opts+=( LIBLOGGING_STDLOG_CFLAGS="-I%{builddir}/%{liblogging}/stdlog" )
+rsyslog_configure_opts+=( LIBLOGGING_STDLOG_LIBS="-L%{builddir}/%{liblogging}/stdlog/.libs -llogging-stdlog" )
 
 ( cd %{librelp} && %configure %{static_only} && make %{?_smp_mflags} )
 
