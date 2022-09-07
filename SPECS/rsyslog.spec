@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2208.0
-Release: 5%{?dist}.zenetys
+Release: 6%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -205,6 +205,10 @@ cd %{liblognorm}
 cd ..
 
 %build
+rsyslog_configure_cflags='-fPIC -g'
+rsyslog_configure_ldflags=
+rsyslog_make_opts=()
+
 export CFLAGS="-fPIC -g"
 
 ( cd %{libestr} && %configure %{static_only} && make %{?_smp_mflags} )
@@ -244,24 +248,21 @@ export CURL_LIBS="%{builddir}/%{libcurl}/lib/.libs/libcurl.a -L%{builddir}/%{lib
 
 ( cd %{libmaxminddb} && %configure %{static_only} && make %{?_smp_mflags} )
 
-export MAXMINDDB_CFLAGS="-I%{builddir}/%{libmaxminddb}/include"
-export MAXMINDDB_LIBS="%{builddir}/%{libmaxminddb}/src/.libs/libmaxminddb.a -L%{builddir}/%{libmaxminddb}/src/.libs"
+rsyslog_configure_cflags+=" -I%{builddir}/%{libmaxminddb}/include"
+rsyslog_configure_ldflags+=" -L%{builddir}/%{libmaxminddb}/src/.libs"
 
-civetweb_make_opts=()
+civetweb_make_opts=( COPT='-DNO_SSL_DL' )
 %if 0%{?rhel} <= 7
   civetweb_make_opts+=( WITH_OPENSSL_API_1_0=1 )
 %endif
 ( cd %{civetweb} && make lib "${civetweb_make_opts[@]}" %{?_smp_mflags} )
 
-export CIVETWEB_CFLAGS="-I%{builddir}/%{civetweb}/include"
-export CIVETWEB_LIBS="%{builddir}/%{civetweb}/libcivetweb.a -L%{builddir}/%{civetweb}"
+rsyslog_configure_cflags+=" -I%{builddir}/%{civetweb}/include"
+rsyslog_make_opts+=( CIVETWEB_LIBS="-L%{builddir}/%{civetweb} -lcivetweb -lssl -lcrypto" )
 
 # apr-util pkgconfig file gives -lldap_r in ldflags, it introduces
 # a useless dependency, so force APU_LIBS to overcome that issue
 export APU_LIBS='-laprutil-1'
-
-export CFLAGS="-fPIC ${MAXMINDDB_CFLAGS} ${CIVETWEB_CFLAGS}"
-export LIBS="${MAXMINDDB_LIBS} ${CIVETWEB_LIBS}"
 
 env |grep -E 'CFLAG|LIBS' |sort >&2
 
@@ -366,14 +367,17 @@ OPTIONS=(
   --enable-imjournal
   --enable-omjournal
 %endif
+
+  CFLAGS="${rsyslog_configure_cflags}"
+  LDFLAGS="${rsyslog_configure_ldflags}"
 )
 
 (
   cd rsyslog-%{version}
   export > config.exports # save environments vars
   autoreconf -i
-  %configure --enable-static=no --enable-shared=yes ${OPTIONS[@]}
-  make %{?_smp_mflags} pkglibdir=%{_libdir}/rsyslog
+  %configure --enable-static=no --enable-shared=yes "${OPTIONS[@]}"
+  make %{?_smp_mflags} pkglibdir=%{_libdir}/rsyslog "${rsyslog_make_opts[@]}"
 )
 
 %install
