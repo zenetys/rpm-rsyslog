@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2208.0
-Release: 6%{?dist}.zenetys
+Release: 7%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -207,6 +207,7 @@ cd ..
 %build
 rsyslog_configure_cflags='-fPIC -g'
 rsyslog_configure_ldflags=
+rsyslog_configure_opts=()
 rsyslog_make_opts=()
 
 export CFLAGS="-fPIC -g"
@@ -242,8 +243,8 @@ export RELP_LIBS="%{builddir}/%{librelp}/src/.libs/librelp.a -L%{builddir}/%{lib
 %if 0%{?rhel} <= 7
 ( cd %{libcurl} && %configure --with-openssl --disable-ldap --disable-ldaps %{static_only} && make %{?_smp_mflags} )
 
-export CURL_CFLAGS="-I%{builddir}/%{libcurl}/include"
-export CURL_LIBS="%{builddir}/%{libcurl}/lib/.libs/libcurl.a -L%{builddir}/%{libcurl}/lib/.libs -lz -lssl -lcrypto"
+rsyslog_configure_opts+=( CURL_CFLAGS="-I%{builddir}/%{libcurl}/include" )
+rsyslog_configure_opts+=( CURL_LIBS="-L%{builddir}/%{libcurl}/lib/.libs -lcurl -lz -lssl -lcrypto" )
 %endif
 
 ( cd %{libmaxminddb} && %configure %{static_only} && make %{?_smp_mflags} )
@@ -370,6 +371,7 @@ OPTIONS=(
 
   CFLAGS="${rsyslog_configure_cflags}"
   LDFLAGS="${rsyslog_configure_ldflags}"
+  "${rsyslog_configure_opts[@]}"
 )
 
 (
