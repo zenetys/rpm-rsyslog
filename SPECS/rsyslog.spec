@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2208.0
-Release: 7%{?dist}.zenetys
+Release: 8%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -237,8 +237,8 @@ export LIBLOGGING_STDLOG_LIBS="%{builddir}/%{liblogging}/stdlog/.libs/liblogging
 
 ( cd %{librelp} && %configure %{static_only} && make %{?_smp_mflags} )
 
-export RELP_CFLAGS="-I%{builddir}/%{librelp}/src"
-export RELP_LIBS="%{builddir}/%{librelp}/src/.libs/librelp.a -L%{builddir}/%{librelp}/src/.libs -lgnutls -lssl -lcrypto"
+rsyslog_configure_opts+=( RELP_CFLAGS="-I%{builddir}/%{librelp}/src" )
+rsyslog_configure_opts+=( RELP_LIBS="-L%{builddir}/%{librelp}/src/.libs -lrelp -lgnutls -lssl -lcrypto" )
 
 %if 0%{?rhel} <= 7
 ( cd %{libcurl} && %configure --with-openssl --disable-ldap --disable-ldaps %{static_only} && make %{?_smp_mflags} )
