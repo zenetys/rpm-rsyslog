@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2208.0
-Release: 4%{?dist}.zenetys
+Release: 5%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -260,8 +260,8 @@ export CIVETWEB_LIBS="%{builddir}/%{civetweb}/libcivetweb.a -L%{builddir}/%{cive
 # a useless dependency, so force APU_LIBS to overcome that issue
 export APU_LIBS='-laprutil-1'
 
-export CFLAGS="-fPIC ${LIBNET_CFLAGS} ${MAXMINDDB_CFLAGS} ${CIVETWEB_CFLAGS}"
-export LIBS="${LIBNET_LIBS} ${MAXMINDDB_LIBS} ${CIVETWEB_LIBS}"
+export CFLAGS="-fPIC ${MAXMINDDB_CFLAGS} ${CIVETWEB_CFLAGS}"
+export LIBS="${MAXMINDDB_LIBS} ${CIVETWEB_LIBS}"
 
 env |grep -E 'CFLAG|LIBS' |sort >&2
 
