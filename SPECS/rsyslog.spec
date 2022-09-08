@@ -223,7 +223,6 @@ civetweb_make_opts=()
 # libestr
 (
     cd %{libestr} &&
-    %configure %{static_only} &&
     %configure %{static_only} \
         "CFLAGS=${libestr_configure_cflags}" &&
     make %{?_smp_mflags}
