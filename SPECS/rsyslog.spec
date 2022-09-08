@@ -222,9 +222,9 @@ civetweb_make_opts=()
 
 # libestr
 (
-    cd %{libestr} &&
+    cd %{libestr}
     %configure %{static_only} \
-        "CFLAGS=${libestr_configure_cflags}" &&
+        "CFLAGS=${libestr_configure_cflags}"
     make %{?_smp_mflags}
 )
 rsyslog_configure_opts+=( LIBESTR_CFLAGS="-I%{builddir}/%{libestr}/include" )
@@ -234,9 +234,9 @@ liblognorm_configure_opts+=( LIBESTR_LIBS="-L%{builddir}/%{libestr}/src/.libs -l
 
 # libfastjson
 (
-    cd %{libfastjson} &&
+    cd %{libfastjson}
     %configure %{static_only} \
-        "CFLAGS=${libfastjson_configure_cflags}" &&
+        "CFLAGS=${libfastjson_configure_cflags}"
     make %{?_smp_mflags}
 )
 rsyslog_configure_opts+=( LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}" )
@@ -251,10 +251,10 @@ liblognorm_configure_opts+=( JSON_C_LIBS="-L%{builddir}/%{libfastjson}/.libs -lf
 
 # liblognorm
 (
-    cd %{liblognorm} &&
+    cd %{liblognorm}
     %configure %{static_only} \
         "CFLAGS=${liblognorm_configure_cflags}" \
-        "${liblognorm_configure_opts[@]}" &&
+        "${liblognorm_configure_opts[@]}"
     make %{?_smp_mflags}
 )
 rsyslog_configure_opts+=( LIBLOGNORM_CFLAGS="-I%{builddir}/%{liblognorm}/src" )
@@ -262,9 +262,9 @@ rsyslog_configure_opts+=( LIBLOGNORM_LIBS="-L%{builddir}/%{liblognorm}/src/.libs
 
 # liblogging-stdlog
 (
-    cd %{liblogging} &&
+    cd %{liblogging}
     %configure %{static_only} \
-        "CFLAGS=${liblogging_configure_cflags}" &&
+        "CFLAGS=${liblogging_configure_cflags}"
     make %{?_smp_mflags}
 )
 rsyslog_configure_opts+=( LIBLOGGING_STDLOG_CFLAGS="-I%{builddir}/%{liblogging}/stdlog" )
@@ -272,9 +272,9 @@ rsyslog_configure_opts+=( LIBLOGGING_STDLOG_LIBS="-L%{builddir}/%{liblogging}/st
 
 # librelp
 (
-    cd %{librelp} &&
+    cd %{librelp}
     %configure %{static_only} \
-        "CFLAGS=${librelp_configure_cflags}" &&
+        "CFLAGS=${librelp_configure_cflags}"
     make %{?_smp_mflags}
 )
 rsyslog_configure_opts+=( RELP_CFLAGS="-I%{builddir}/%{librelp}/src" )
@@ -283,12 +283,12 @@ rsyslog_configure_opts+=( RELP_LIBS="-L%{builddir}/%{librelp}/src/.libs -lrelp -
 # libcurl
 %if 0%{?rhel} <= 7
 (
-    cd %{libcurl} &&
+    cd %{libcurl}
     %configure %{static_only} \
         --with-openssl \
         --disable-ldap \
         --disable-ldaps \
-        "CFLAGS=${libcurl_configure_cflags}" &&
+        "CFLAGS=${libcurl_configure_cflags}"
     make %{?_smp_mflags}
 )
 rsyslog_configure_opts+=( CURL_CFLAGS="-I%{builddir}/%{libcurl}/include" )
@@ -297,9 +297,9 @@ rsyslog_configure_opts+=( CURL_LIBS="-L%{builddir}/%{libcurl}/lib/.libs -lcurl -
 
 # libmaxminddb
 (
-    cd %{libmaxminddb} &&
+    cd %{libmaxminddb}
     %configure %{static_only} \
-        "CFLAGS=${libmaxminddb_configure_cflags}" &&
+        "CFLAGS=${libmaxminddb_configure_cflags}"
     make %{?_smp_mflags}
 )
 rsyslog_configure_cflags+=" -I%{builddir}/%{libmaxminddb}/include"
@@ -312,7 +312,7 @@ civetweb_make_opts+=( WITH_CFLAGS="$civetweb_cflags" )
 civetweb_make_opts+=( WITH_OPENSSL_API_1_0=1 )
 %endif
 (
-    cd %{civetweb} &&
+    cd %{civetweb}
     make lib %{?_smp_mflags} \
         "${civetweb_make_opts[@]}"
 )
