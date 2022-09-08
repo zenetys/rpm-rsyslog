@@ -319,6 +319,8 @@ civetweb_make_opts+=( WITH_OPENSSL_API_1_0=1 )
 rsyslog_configure_cflags+=" -I%{builddir}/%{civetweb}/include"
 rsyslog_make_opts+=( CIVETWEB_LIBS="-L%{builddir}/%{civetweb} -lcivetweb -lssl -lcrypto" )
 
+# rsyslog
+
 # apr-util pkgconfig file gives -lldap_r in ldflags, it introduces
 # a useless dependency, so force APU_LIBS to overcome that issue
 rsyslog_configure_opts+=( APU_LIBS='-laprutil-1' )
