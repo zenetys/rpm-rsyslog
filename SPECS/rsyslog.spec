@@ -278,7 +278,7 @@ rsyslog_configure_opts+=( LIBLOGGING_STDLOG_LIBS="-L%{builddir}/%{liblogging}/st
   make %{?_smp_mflags}
 )
 rsyslog_configure_opts+=( RELP_CFLAGS="-I%{builddir}/%{librelp}/src" )
-rsyslog_configure_opts+=( RELP_LIBS="-L%{builddir}/%{librelp}/src/.libs -lrelp -lgnutls -lssl -lcrypto" )
+rsyslog_configure_opts+=( RELP_LIBS="-L%{builddir}/%{librelp}/src/.libs -lrelp -lrt -lgnutls -lssl -lcrypto" )
 
 # libcurl
 %if 0%{?rhel} <= 7
