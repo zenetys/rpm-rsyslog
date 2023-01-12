@@ -10,7 +10,7 @@
 %define liblognorm              liblognorm-2.0.6
 %define liblogging              liblogging-1.0.6
 %define libfastjson             libfastjson-0.99.9
-%define librelp                 librelp-1.10.0
+%define librelp                 librelp-1.11.0
 %if 0%{?rhel} <= 7
 %define libcurl                 curl-7.86.0
 %endif
@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2212.0
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
