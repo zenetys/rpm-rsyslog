@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2302.0
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -463,10 +463,6 @@ OPTIONS=(
 (
   cd rsyslog-%{version}
   %make_install pkglibdir=%{_libdir}/rsyslog
-  install -d -m 755 %{buildroot}%{_docdir}
-  install -p -m 644 AUTHORS %{buildroot}%{_docdir}
-  install -p -m 644 COPYING* %{buildroot}%{_docdir}
-  install -p -m 644 ChangeLog %{buildroot}%{_docdir}
 )
 rm -f %{buildroot}%{_libdir}/rsyslog/*.la
 rm -f %{buildroot}%{_bindir}/rscryutil
@@ -536,9 +532,9 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc %{_docdir}/AUTHORS
-%doc %{_docdir}/COPYING*
-%doc %{_docdir}/ChangeLog
+%doc rsyslog-%{version}/AUTHORS
+%doc rsyslog-%{version}/COPYING*
+%doc rsyslog-%{version}/ChangeLog
 %doc %{_mandir}/*/*
 %{_sbindir}/rsyslogd
 %{_sbindir}/msggen
