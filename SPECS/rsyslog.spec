@@ -9,7 +9,7 @@
 %define libestr                 libestr-0.1.11
 %define liblognorm              liblognorm-2.0.6
 %define liblogging              liblogging-1.0.6
-%define libfastjson             libfastjson-0.99.9
+%define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.11.0
 %if 0%{?rhel} <= 7
 %define libcurl                 curl-8.0.1

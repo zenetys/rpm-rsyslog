@@ -2,7 +2,7 @@ rsyslog 8.2302.0 lynx https://www.rsyslog.com/downloads/download-v8-stable/
 libestr 0.1.11 lynx https://libestr.adiscon.com/download/
 liblognorm 2.0.6 lynx https://www.liblognorm.com/download/
 liblogging 1.0.6 lynx http://download.rsyslog.com/liblogging/
-libfastjson 0.99.9 lynx http://download.rsyslog.com/libfastjson/
+libfastjson 1.2304.0 lynx http://download.rsyslog.com/libfastjson/
 librelp 1.11.0 lynx http://download.rsyslog.com/librelp/
 curl 8.0.1 lynx https://curl.haxx.se/download/
 libmaxminddb 1.7.1 json https://api.github.com/repos/maxmind/libmaxminddb/tags =([0-9.]+)
