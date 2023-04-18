@@ -16,7 +16,7 @@
 %endif
 %define libmaxminddb_version    1.7.1
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
-%define civetweb_version        1.15
+%define civetweb_version        1.16
 %define civetweb                civetweb-%{civetweb_version}
 %define builddir                %{_builddir}/%{name}-%{version}
 %define static_only             --enable-static --disable-shared
