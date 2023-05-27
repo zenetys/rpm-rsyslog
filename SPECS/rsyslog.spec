@@ -12,7 +12,7 @@
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.11.0
 %if 0%{?rhel} <= 7
-%define libcurl                 curl-8.0.1
+%define libcurl                 curl-8.1.1
 %endif
 %define libmaxminddb_version    1.7.1
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2304.0
-Release: 1%{?dist}.zenetys
+Release: 2%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -54,6 +54,9 @@ Patch204: liblognorm-string-perm-chars-overflow.patch
 
 %if 0%{?rhel} <= 7
 # curl patches
+Patch300: curl-8.1.1-configure-compilersh-01.patch
+Patch301: curl-8.1.1-configure-compilersh-02.patch
+Patch302: curl-8.1.1-configure-ac-compile-ifelse.patch
 %endif
 
 URL: http://www.rsyslog.com/
@@ -181,6 +184,11 @@ MySQL database support to rsyslog.
 %if 0%{?rhel} <= 7
 %setup -T -D -a 400
 # curl patches
+cd %{libcurl}
+%patch300 -p1 -b .configure-compilersh-01
+%patch301 -p1 -b .configure-compilersh-02
+%patch302 -p1 -b .configure-ac-compile-ifelse
+cd ..
 %endif
 %setup -T -D -a 402
 %setup -T -D -a 403
@@ -294,6 +302,7 @@ rsyslog_configure_opts+=( RELP_LIBS="-L%{builddir}/%{librelp}/src/.libs -lrelp -
 %if 0%{?rhel} <= 7
 (
   cd %{libcurl}
+  autoreconf -fi
   %configure %{static_only} \
     --with-openssl \
     --disable-ldap \

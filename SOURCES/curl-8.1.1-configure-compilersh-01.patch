@@ -1,0 +1,31 @@
+From 471dab2da0c6b2b08ca2b96a1da0a4825e2c3c36 Mon Sep 17 00:00:00 2001
+From: Christian Hesse <mail@eworm.de>
+Date: Tue, 23 May 2023 09:40:18 +0200
+Subject: [PATCH] configure: quote the assignments for run-compiler
+
+Building for multilib failed, as the compiler command contains an
+extra argument. That needs quoting.
+
+Regression from b78ca50cb3dda361f9c1
+
+Fixes #11179
+Closes #11180
+---
+ configure.ac | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 75a882b12a498..17dd05a94c9a2 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -193,8 +193,8 @@ dnl something different but only have that affect the execution of the results
+ dnl of the compile, not change the libraries for the compiler itself.
+ dnl
+ compilersh="run-compiler"
+-echo "CC=$CC" > $compilersh
+-echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> $compilersh
++echo "CC=\"$CC\"" > $compilersh
++echo "LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"" >> $compilersh
+ echo 'exec $CC $@' >> $compilersh
+ 
+ dnl **********************************************************************
