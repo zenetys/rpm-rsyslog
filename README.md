@@ -1,6 +1,6 @@
-| Package&nbsp;name | Supported&nbsp;targets |
-| :--- | :--- |
-| rsyslog8z, rsyslog8z-mysql | el6, el7, el8, el9 |
+| Package&nbsp;name | Supported&nbsp;targets | Includes |
+| :--- | :--- | :--- |
+| rsyslog8z, <nobr>rsyslog8z-mysql</nobr> | el6, el7, el8, el9 | Linked static: libestr, liblognorm, liblognorm, libfastjson, librelp, <nobr>libcurl (el6, el7)</nobr>, libmaxminddb, civetweb |
 <br/>
 
 ## Build:
