@@ -4,6 +4,6 @@ liblognorm 2.0.6 lynx https://www.liblognorm.com/download/
 liblogging 1.0.6 lynx http://download.rsyslog.com/liblogging/
 libfastjson 1.2304.0 lynx http://download.rsyslog.com/libfastjson/
 librelp 1.11.0 lynx http://download.rsyslog.com/librelp/
-curl 8.1.2 lynx https://curl.haxx.se/download/
+curl 8.2.0 lynx https://curl.haxx.se/download/
 libmaxminddb 1.7.1 json https://api.github.com/repos/maxmind/libmaxminddb/tags =([0-9.]+)
 civetweb 1.16 json https://api.github.com/repos/civetweb/civetweb/tags =v([0-9.]+)
