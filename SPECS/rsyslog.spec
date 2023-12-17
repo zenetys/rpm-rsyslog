@@ -106,6 +106,7 @@ Provides: rsyslog-elasticsearch
 Provides: rsyslog-fmhash
 Provides: rsyslog-fmhttp
 Provides: rsyslog-gnutls
+Provides: rsyslog-logrotate
 Provides: rsyslog-mmaudit
 Provides: rsyslog-mmfields
 Provides: rsyslog-mmjsonparse
@@ -125,6 +126,7 @@ Obsoletes: rsyslog-elasticsearch
 Obsoletes: rsyslog-fmhash
 Obsoletes: rsyslog-fmhttp
 Obsoletes: rsyslog-gnutls
+Obsoletes: rsyslog-logrotate
 Obsoletes: rsyslog-mmaudit
 Obsoletes: rsyslog-mmfields
 Obsoletes: rsyslog-mmjsonparse
