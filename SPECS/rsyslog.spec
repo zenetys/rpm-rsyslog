@@ -12,7 +12,7 @@
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.11.0
 %if 0%{?rhel} <= 7
-%define libcurl                 curl-8.4.0
+%define libcurl                 curl-8.5.0
 %endif
 %define libmaxminddb_version    1.8.0
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
