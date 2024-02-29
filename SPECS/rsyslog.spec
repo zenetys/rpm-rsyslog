@@ -23,8 +23,8 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2312.0
-Release: 3%{?dist}.zenetys
+Version: 8.2402.0
+Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -46,6 +46,7 @@ Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
+Patch100: rsyslog-8.2402.0-imdtls-omdtls-linking.patch
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
 Patch202: liblognorm-string-rulebase-bugfix-segfault-when-using-LF-in-jso.patch
@@ -189,6 +190,7 @@ MySQL database support to rsyslog.
 
 cd rsyslog-%{version}
 # rsyslog patches
+%patch100 -p1
 cd ..
 
 cd %{liblognorm}
@@ -403,12 +405,18 @@ OPTIONS=(
   --enable-libfaketime
   # --enable-helgrind
   --enable-imdiag
+%if 0%{?rhel} >= 8
+  --enable-imdtls
+%endif
   --enable-imfile
   --enable-imhttp
   --enable-improg
   # --enable-imsolaris
   --enable-imptcp
   --enable-impstats
+%if 0%{?rhel} >= 8
+  --enable-omdtls
+%endif
   --enable-omprog
   --enable-omstdout
   # --enable-journal-tests
@@ -548,6 +556,9 @@ fi
 %{_libdir}/rsyslog/fmhttp.so
 %{_libdir}/rsyslog/fmunflatten.so
 %{_libdir}/rsyslog/imdiag.so
+%if 0%{?rhel} >= 8
+%{_libdir}/rsyslog/imdtls.so
+%endif
 %{_libdir}/rsyslog/imfile.so
 %{_libdir}/rsyslog/imhttp.so
 %{_libdir}/rsyslog/imklog.so
@@ -584,6 +595,9 @@ fi
 %{_libdir}/rsyslog/mmsequence.so
 %{_libdir}/rsyslog/mmsnmptrapd.so
 %{_libdir}/rsyslog/mmutf8fix.so
+%if 0%{?rhel} >= 8
+%{_libdir}/rsyslog/omdtls.so
+%endif
 %{_libdir}/rsyslog/omhttp.so
 %{_libdir}/rsyslog/ommail.so
 %{_libdir}/rsyslog/omprog.so
