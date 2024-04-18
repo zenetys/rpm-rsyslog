@@ -46,6 +46,7 @@ Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
+Patch100: rsyslog-8.2404.0-ossl-precompiler-checks.patch
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
 Patch202: liblognorm-string-rulebase-bugfix-segfault-when-using-LF-in-jso.patch
@@ -189,6 +190,7 @@ MySQL database support to rsyslog.
 
 cd rsyslog-%{version}
 # rsyslog patches
+%patch100 -p1
 cd ..
 
 cd %{liblognorm}
