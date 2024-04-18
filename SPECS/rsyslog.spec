@@ -12,7 +12,7 @@
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.11.0
 %if 0%{?rhel} <= 7
-%define libcurl                 curl-8.6.0
+%define libcurl                 curl-8.7.1
 %endif
 %define libmaxminddb_version    1.9.1
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
@@ -24,7 +24,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2402.0
-Release: 1%{?dist}.zenetys
+Release: 2%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
