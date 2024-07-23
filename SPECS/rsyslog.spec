@@ -11,9 +11,6 @@
 %define liblogging              liblogging-1.0.6
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.11.0
-%if 0%{?rhel} <= 7
-%define libcurl                 curl-8.8.0
-%endif
 %define libmaxminddb_version    1.10.0
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
 %define civetweb_version        1.16
@@ -40,9 +37,6 @@ Source301: http://www.liblognorm.com/files/download/%{liblognorm}.tar.gz
 Source302: http://download.rsyslog.com/liblogging/%{liblogging}.tar.gz
 Source303: http://download.rsyslog.com/libfastjson/%{libfastjson}.tar.gz
 Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
-%if 0%{?rhel} <= 7
-Source400: https://curl.haxx.se/download/%{libcurl}.tar.xz
-%endif
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
@@ -52,10 +46,6 @@ Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
 Patch202: liblognorm-string-rulebase-bugfix-segfault-when-using-LF-in-jso.patch
 Patch203: liblognorm-custom-type-memory-leak.patch
 Patch204: liblognorm-string-perm-chars-overflow.patch
-
-%if 0%{?rhel} <= 7
-# curl patches
-%endif
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -74,33 +64,18 @@ BuildRequires: libuuid-devel
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
+BuildRequires: pkgconfig(libcurl)
 BuildRequires: zlib-devel
 
-%if 0%{?rhel} >= 8
-BuildRequires: pkgconfig(libcurl)
-%endif
-
-%if 0%{?rhel} >= 7
 BuildRequires: systemd-devel >= 219-39
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
-%else
-Requires(post): /sbin/chkconfig
-Requires(preun): /sbin/chkconfig
-Requires(preun): /sbin/service
-Requires(postun): /sbin/service
-%endif
 
 Requires: bash >= 2.0
 Requires: gnutls
 Requires: logrotate >= 3.5.2
-
-%if 0%{?rhel} >= 7
 Requires: openssl-libs
-%else
-Requires: openssl
-%endif
 
 Provides: rsyslog
 Provides: rsyslog-elasticsearch
@@ -150,25 +125,10 @@ Summary: MySQL support for rsyslog
 Group: System Environment/Daemons
 Requires: %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 # mysql_config is required by rsyslog configure script
-%if 0%{?rhel} >= 8
 # on el8, mariadb-connector-c-devel contains mysql_config;
 # dependencies install libs and headers; mysql is still available
 # via stream but mariadb should be preferred.
 BuildRequires: mariadb-connector-c-devel
-%else
-%if 0%{?rhel} == 7
-# on el7, mariadb-devel (which provides mysql-devel) contains
-# mysql_config; dependencies install libs and headers
-BuildRequires: mariadb-devel
-%else
-%if 0%{?rhel} <= 6
-# on el6, mysql contains the libs and mysql_config but does not
-# depends on the headers so we need mysql-devel as well
-BuildRequires: mysql
-BuildRequires: mysql-devel
-%endif
-%endif
-%endif
 
 %description mysql
 The rsyslog-mysql package contains a dynamic shared object that will add
@@ -181,10 +141,6 @@ MySQL database support to rsyslog.
 %setup -T -D -a 302
 %setup -T -D -a 303
 %setup -T -D -a 304
-%if 0%{?rhel} <= 7
-%setup -T -D -a 400
-# curl patches
-%endif
 %setup -T -D -a 402
 %setup -T -D -a 403
 
@@ -294,23 +250,6 @@ rsyslog_configure_opts+=( LIBLOGGING_STDLOG_LIBS="-L%{builddir}/%{liblogging}/st
 rsyslog_configure_opts+=( RELP_CFLAGS="-I%{builddir}/%{librelp}/src" )
 rsyslog_configure_opts+=( RELP_LIBS="-L%{builddir}/%{librelp}/src/.libs -lrelp -lrt -lgnutls -lssl -lcrypto" )
 
-# libcurl
-%if 0%{?rhel} <= 7
-(
-  cd %{libcurl}
-  %configure %{static_only} \
-    --with-openssl \
-    --disable-ldap \
-    --disable-ldaps \
-    --without-libpsl \
-    ${libcurl_configure_cflags:+"CFLAGS=$libcurl_configure_cflags"} \
-    ${libcurl_configure_ldflags:+"LDFLAGS=$libcurl_configure_ldflags"}
-  make V=1 %{?_smp_mflags}
-)
-rsyslog_configure_opts+=( CURL_CFLAGS="-I%{builddir}/%{libcurl}/include" )
-rsyslog_configure_opts+=( CURL_LIBS="-L%{builddir}/%{libcurl}/lib/.libs -lcurl -lz -lssl -lcrypto" )
-%endif
-
 # libmaxminddb
 (
   cd %{libmaxminddb}
@@ -326,9 +265,6 @@ rsyslog_configure_ldflags+=" -L%{builddir}/%{libmaxminddb}/src/.libs"
 civetweb_make_opts+=( ${civetweb_cflags:+"WITH_CFLAGS=$civetweb_cflags"} )
 civetweb_make_opts+=( ${civetweb_ldflags:+"LDFLAGS=$civetweb_ldflags"} )
 civetweb_make_opts+=( COPT='-DNO_SSL_DL' )
-%if 0%{?rhel} <= 7
-civetweb_make_opts+=( WITH_OPENSSL_API_1_0=1 )
-%endif
 (
   cd %{civetweb}
   make lib V=1 %{?_smp_mflags} \
@@ -405,18 +341,14 @@ OPTIONS=(
   --enable-libfaketime
   # --enable-helgrind
   --enable-imdiag
-%if 0%{?rhel} >= 8
   --enable-imdtls
-%endif
   --enable-imfile
   --enable-imhttp
   --enable-improg
   # --enable-imsolaris
   --enable-imptcp
   --enable-impstats
-%if 0%{?rhel} >= 8
   --enable-omdtls
-%endif
   --enable-omprog
   --enable-omstdout
   # --enable-journal-tests
@@ -445,11 +377,9 @@ OPTIONS=(
   # --enable-omamqp1
   # --enable-omtcl
 
-%if 0%{?rhel} >= 7
   --enable-libsystemd
   --enable-imjournal
   --enable-omjournal
-%endif
 )
 
 (
@@ -484,18 +414,10 @@ install -d -m 700 %{buildroot}%{_var}/lib/rsyslog
 install -d -m 755 %{buildroot}%{_sysconfdir}/rsyslog.d
 install -p -m 644 %{SOURCE10} %{buildroot}%{_sysconfdir}/rsyslog.conf
 install -D -p -m 644 %{SOURCE11} %{buildroot}%{_sysconfdir}/sysconfig/rsyslog
-%if 0%{?rhel} >= 7
 sed -i -e 's/^#imjournal# //' %{buildroot}%{_sysconfdir}/rsyslog.conf
 sed -i -e '/^#imklog# /d' %{buildroot}%{_sysconfdir}/rsyslog.conf
 install -D -p -m 644 %{SOURCE12} %{buildroot}%{_sysconfdir}/logrotate.d/syslog
 install -D -p -m 755 %{SOURCE15} %{buildroot}%{_unitdir}/rsyslog.service
-%else
-sed -i -e '/^#imjournal# /d' %{buildroot}%{_sysconfdir}/rsyslog.conf
-sed -i -e 's/^#imklog# //' %{buildroot}%{_sysconfdir}/rsyslog.conf
-install -D -p -m 644 %{SOURCE13} %{buildroot}%{_sysconfdir}/logrotate.d/syslog
-install -D -p -m 755 %{SOURCE14} %{buildroot}%{_initrddir}/rsyslog
-rm -rf %{buildroot}%{_unitdir}
-%endif
 
 cat rsyslog-%{version}/tools/recover_qi.pl |
   tr -d '\r' > %{buildroot}%{_bindir}/rsyslog-recover-qi.pl
@@ -508,38 +430,13 @@ do
   ( umask 066 && touch $n )
 done
 
-%if 0%{?rhel} >= 7
 %systemd_post rsyslog.service
-%else
-/sbin/chkconfig --add rsyslog
-%endif
-
-%if 0%{?rhel} == 7
-if [ -f /etc/rsyslog.d/listen.conf ]; then
-    # This file is brought by the systemd package and produces
-    # a warning at rsyslog start. Comment out the directive.
-    sed -i -re 's,^\s*(\$SystemLogSocketName\s),# \1,' /etc/rsyslog.d/listen.conf
-fi
-%endif
 
 %preun
-%if 0%{?rhel} >= 7
 %systemd_preun rsyslog.service
-%else
-if [ "$1" = 0 ]; then
-  /sbin/service rsyslog stop >/dev/null 2>&1 || :
-  /sbin/chkconfig --del rsyslog
-fi
-%endif
 
 %postun
-%if 0%{?rhel} >= 7
 %systemd_postun_with_restart rsyslog.service
-%else
-if [ "$1" -ge 1 ]; then
-  /sbin/service rsyslog condrestart >/dev/null 2>&1 || :
-fi
-%endif
 
 %files
 %defattr(-,root,root,-)
@@ -556,9 +453,7 @@ fi
 %{_libdir}/rsyslog/fmhttp.so
 %{_libdir}/rsyslog/fmunflatten.so
 %{_libdir}/rsyslog/imdiag.so
-%if 0%{?rhel} >= 8
 %{_libdir}/rsyslog/imdtls.so
-%endif
 %{_libdir}/rsyslog/imfile.so
 %{_libdir}/rsyslog/imhttp.so
 %{_libdir}/rsyslog/imklog.so
@@ -595,9 +490,7 @@ fi
 %{_libdir}/rsyslog/mmsequence.so
 %{_libdir}/rsyslog/mmsnmptrapd.so
 %{_libdir}/rsyslog/mmutf8fix.so
-%if 0%{?rhel} >= 8
 %{_libdir}/rsyslog/omdtls.so
-%endif
 %{_libdir}/rsyslog/omhttp.so
 %{_libdir}/rsyslog/ommail.so
 %{_libdir}/rsyslog/omprog.so
@@ -613,21 +506,15 @@ fi
 %{_libdir}/rsyslog/pmnull.so
 %{_libdir}/rsyslog/pmpanngfw.so
 %{_sbindir}/rsyslog_diag_hostname
-%if 0%{?rhel} >= 7
 %{_libdir}/rsyslog/imjournal.so
 %{_libdir}/rsyslog/omjournal.so
-%endif
 %{_bindir}/lognormalizer
 %{_bindir}/rsyslog-recover-qi.pl
 %config(noreplace) %{_sysconfdir}/rsyslog.conf
 %dir %{_sysconfdir}/rsyslog.d
 %config(noreplace) %{_sysconfdir}/sysconfig/rsyslog
 %config(noreplace) %{_sysconfdir}/logrotate.d/syslog
-%if 0%{?rhel} >= 7
 %{_unitdir}/rsyslog.service
-%else
-%{_initrddir}/rsyslog
-%endif
 %dir %{_var}/lib/rsyslog
 
 %files mysql
