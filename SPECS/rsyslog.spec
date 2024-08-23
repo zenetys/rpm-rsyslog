@@ -11,7 +11,7 @@
 %define liblogging              liblogging-1.0.6
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.11.0
-%define libmaxminddb_version    1.10.0
+%define libmaxminddb_version    1.11.0
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
 %define civetweb_version        1.16
 %define civetweb                civetweb-%{civetweb_version}
