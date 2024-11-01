@@ -54,12 +54,14 @@ BuildRequires: apr-util-devel
 BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: bison
+BuildRequires: gcc
 BuildRequires: flex
 BuildRequires: gnutls-devel
 BuildRequires: libgcrypt-devel
 BuildRequires: libnet-devel
 BuildRequires: libtool
 BuildRequires: libuuid-devel
+BuildRequires: make
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
