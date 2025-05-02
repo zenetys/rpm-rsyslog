@@ -29,8 +29,6 @@ Source0: http://www.rsyslog.com/files/download/rsyslog/rsyslog-%{version}.tar.gz
 Source10: rsyslog.conf
 Source11: rsyslog.sysconfig
 Source12: rsyslog.logrotate.systemd
-Source13: rsyslog.logrotate.init
-Source14: rsyslog.init
 Source15: rsyslog.service
 Source300: http://libestr.adiscon.com/files/download/%{libestr}.tar.gz
 Source301: http://www.liblognorm.com/files/download/%{liblognorm}.tar.gz
