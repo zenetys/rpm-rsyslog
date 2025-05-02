@@ -414,7 +414,11 @@ install -p -m 644 %{SOURCE10} %{buildroot}%{_sysconfdir}/rsyslog.conf
 install -D -p -m 644 %{SOURCE11} %{buildroot}%{_sysconfdir}/sysconfig/rsyslog
 sed -i -e 's/^#imjournal# //' %{buildroot}%{_sysconfdir}/rsyslog.conf
 sed -i -e '/^#imklog# /d' %{buildroot}%{_sysconfdir}/rsyslog.conf
+%if 0%{?rhel} <= 8
 install -D -p -m 644 %{SOURCE12} %{buildroot}%{_sysconfdir}/logrotate.d/syslog
+%else
+install -D -p -m 644 %{SOURCE12} %{buildroot}%{_sysconfdir}/logrotate.d/rsyslog
+%endif
 install -D -p -m 755 %{SOURCE15} %{buildroot}%{_unitdir}/rsyslog.service
 
 cat rsyslog-%{version}/tools/recover_qi.pl |
@@ -511,7 +515,11 @@ done
 %config(noreplace) %{_sysconfdir}/rsyslog.conf
 %dir %{_sysconfdir}/rsyslog.d
 %config(noreplace) %{_sysconfdir}/sysconfig/rsyslog
+%if 0%{?rhel} <= 8
 %config(noreplace) %{_sysconfdir}/logrotate.d/syslog
+%else
+%config(noreplace) %{_sysconfdir}/logrotate.d/rsyslog
+%endif
 %{_unitdir}/rsyslog.service
 %dir %{_var}/lib/rsyslog
 
