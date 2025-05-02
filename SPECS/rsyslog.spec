@@ -404,7 +404,6 @@ OPTIONS=(
   %make_install pkglibdir=%{_libdir}/rsyslog
 )
 rm -f %{buildroot}%{_libdir}/rsyslog/*.la
-rm -f %{buildroot}%{_bindir}/rscryutil
 
 gzip %{buildroot}%{_mandir}/*/*.[0-9]
 
@@ -511,6 +510,7 @@ done
 %{_libdir}/rsyslog/imjournal.so
 %{_libdir}/rsyslog/omjournal.so
 %{_bindir}/lognormalizer
+%{_bindir}/rscryutil
 %{_bindir}/rsyslog-recover-qi.pl
 %config(noreplace) %{_sysconfdir}/rsyslog.conf
 %dir %{_sysconfdir}/rsyslog.d
