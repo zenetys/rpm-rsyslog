@@ -111,7 +111,7 @@ Provides: rsyslog-mmnormalize
 Conflicts: rsyslog-mmnormalize
 Provides: rsyslog-mmsnmptrapd
 Conflicts: rsyslog-mmsnmptrapd
-#Provides: rsyslog-mmtaghostname
+Provides: rsyslog-mmtaghostname
 Conflicts: rsyslog-mmtaghostname
 #Provides: rsyslog-mongodb
 Conflicts: rsyslog-mongodb
@@ -341,6 +341,7 @@ OPTIONS=(
   --enable-mmutf8fix
   --enable-mmcount
   --enable-mmsequence
+  --enable-mmtaghostname
   --enable-mmdblookup
   --enable-mmfields
   --enable-mmpstrucdata
@@ -510,6 +511,7 @@ done
 %{_libdir}/rsyslog/mmrm1stspace.so
 %{_libdir}/rsyslog/mmsequence.so
 %{_libdir}/rsyslog/mmsnmptrapd.so
+%{_libdir}/rsyslog/mmtaghostname.so
 %{_libdir}/rsyslog/mmutf8fix.so
 %{_libdir}/rsyslog/omdtls.so
 %{_libdir}/rsyslog/omhttp.so
