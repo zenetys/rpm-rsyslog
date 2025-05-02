@@ -3,6 +3,8 @@
 # Author: Benoit DOLEZ <bdolez@zenetys.com>
 # Copyright: 2019
 #
+# Supported targets: el8, el9
+# Replace distro package with: dnf install rsyslog8z --allowerasing
 
 %global __requires_exclude_from ^%{_bindir}/rsyslog-recover-qi\\.pl$
 
@@ -76,45 +78,60 @@ Requires: gnutls
 Requires: logrotate >= 3.5.2
 Requires: openssl-libs
 
+# This package is not compatible with standard rsyslog packages from the
+# distro. It is an alternative. The following conflicts lines will handle
+# standard redhat packages found in el8, el9, el10s.
 Provides: rsyslog
+Conflicts: rsyslog
+Provides: rsyslog-crypto
+Conflicts: rsyslog-crypto
 Provides: rsyslog-elasticsearch
-Provides: rsyslog-fmhash
-Provides: rsyslog-fmhttp
+Conflicts: rsyslog-elasticsearch
 Provides: rsyslog-gnutls
+Conflicts: rsyslog-gnutls
+#Provides: rsyslog-gssapi
+Conflicts: rsyslog-gssapi
+#Provides: rsyslog-hiredis
+Conflicts: rsyslog-hiredis
+#Provides: rsyslog-kafka
+Conflicts: rsyslog-kafka
+#Provides: rsyslog-libdbi
+Conflicts: rsyslog-libdbi
 Provides: rsyslog-logrotate
+Conflicts: rsyslog-logrotate
 Provides: rsyslog-mmaudit
+Conflicts: rsyslog-mmaudit
 Provides: rsyslog-mmfields
+Conflicts: rsyslog-mmfields
 Provides: rsyslog-mmjsonparse
+Conflicts: rsyslog-mmjsonparse
+#Provides: rsyslog-mmkubernetes
+Conflicts: rsyslog-mmkubernetes
 Provides: rsyslog-mmnormalize
-Provides: rsyslog-mmrm1stspace
-Provides: rsyslog-mysql
-Provides: rsyslog-omhttp
+Conflicts: rsyslog-mmnormalize
+Provides: rsyslog-mmsnmptrapd
+Conflicts: rsyslog-mmsnmptrapd
+#Provides: rsyslog-mmtaghostname
+Conflicts: rsyslog-mmtaghostname
+#Provides: rsyslog-mongodb
+Conflicts: rsyslog-mongodb
+#Provides: rsyslog-omamqp1
+Conflicts: rsyslog-omamqp1
 Provides: rsyslog-openssl
-Provides: rsyslog-pmciscoios
+Conflicts: rsyslog-openssl
+#Provides: rsyslog-pgsql
+Conflicts: rsyslog-pgsql
+#Provides: rsyslog-rabbitmq
+Conflicts: rsyslog-rabbitmq
 Provides: rsyslog-relp
+Conflicts: rsyslog-relp
 Provides: rsyslog-snmp
+Conflicts: rsyslog-snmp
 Provides: rsyslog-udpspoof
-Provides: syslog
+Conflicts: rsyslog-udpspoof
 
-Obsoletes: rsyslog
-Obsoletes: rsyslog-elasticsearch
-Obsoletes: rsyslog-fmhash
-Obsoletes: rsyslog-fmhttp
-Obsoletes: rsyslog-gnutls
-Obsoletes: rsyslog-logrotate
-Obsoletes: rsyslog-mmaudit
-Obsoletes: rsyslog-mmfields
-Obsoletes: rsyslog-mmjsonparse
-Obsoletes: rsyslog-mmnormalize
-Obsoletes: rsyslog-mmrm1stspace
-Obsoletes: rsyslog-mysql
-Obsoletes: rsyslog-omhttp
-Obsoletes: rsyslog-openssl
-Obsoletes: rsyslog-pmciscoios
-Obsoletes: rsyslog-relp
-Obsoletes: rsyslog-snmp
-Obsoletes: rsyslog-udpspoof
-Obsoletes: syslog
+Provides: syslog
+Obsoletes: sysklogd < 1.5-11
 
 %description
 Rsyslog is an enhanced, multi-threaded syslog daemon.
@@ -128,6 +145,9 @@ Requires: %{name}%{?_isa} = %{?epoch:%{epoch}:}%{version}-%{release}
 # dependencies install libs and headers; mysql is still available
 # via stream but mariadb should be preferred.
 BuildRequires: mariadb-connector-c-devel
+
+Provides: rsyslog-mysql
+Conflicts: rsyslog-mysql
 
 %description mysql
 The rsyslog-mysql package contains a dynamic shared object that will add
