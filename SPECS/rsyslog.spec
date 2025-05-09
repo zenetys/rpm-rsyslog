@@ -3,8 +3,15 @@
 # Author: Benoit DOLEZ <bdolez@zenetys.com>
 # Copyright: 2019
 #
+
 # Supported targets: el8, el9
 # Replace distro package with: dnf install rsyslog8z --allowerasing
+#
+# This package is not compatible with standard rsyslog packages from the
+# distro nor adiscon repo. It is an alternative, mostly for liblognorm
+# patches not merged upstream. Conflicts lines will handle standard redhat
+# packages found in el8, el9, el10s, and packages names found in adiscon
+# repo, as well as rsyslog-imhttp built in neither.
 
 %global __requires_exclude_from ^%{_bindir}/rsyslog-recover-qi\\.pl$
 
@@ -23,7 +30,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2504.0
-Release: 1%{?dist}.zenetys
+Release: 2%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -78,21 +85,24 @@ Requires: gnutls
 Requires: logrotate >= 3.5.2
 Requires: openssl-libs
 
-# This package is not compatible with standard rsyslog packages from the
-# distro. It is an alternative. The following conflicts lines will handle
-# standard redhat packages found in el8, el9, el10s.
 Provides: rsyslog
 Conflicts: rsyslog
 Provides: rsyslog-crypto
 Conflicts: rsyslog-crypto
 Provides: rsyslog-elasticsearch
 Conflicts: rsyslog-elasticsearch
+Provides: rsyslog-fmhash
+Conflicts: rsyslog-fmhash
+Provides: rsyslog-fmhttp
+Conflicts: rsyslog-fmhttp
 Provides: rsyslog-gnutls
 Conflicts: rsyslog-gnutls
 #Provides: rsyslog-gssapi
 Conflicts: rsyslog-gssapi
 #Provides: rsyslog-hiredis
 Conflicts: rsyslog-hiredis
+Provides: rsyslog-imhttp
+Conflicts: rsyslog-imhttp
 #Provides: rsyslog-kafka
 Conflicts: rsyslog-kafka
 #Provides: rsyslog-libdbi
@@ -109,6 +119,8 @@ Conflicts: rsyslog-mmjsonparse
 Conflicts: rsyslog-mmkubernetes
 Provides: rsyslog-mmnormalize
 Conflicts: rsyslog-mmnormalize
+Provides: rsyslog-mmrm1stspace
+Conflicts: rsyslog-mmrm1stspace
 Provides: rsyslog-mmsnmptrapd
 Conflicts: rsyslog-mmsnmptrapd
 Provides: rsyslog-mmtaghostname
@@ -117,10 +129,18 @@ Conflicts: rsyslog-mmtaghostname
 Conflicts: rsyslog-mongodb
 #Provides: rsyslog-omamqp1
 Conflicts: rsyslog-omamqp1
+#Provides: rsyslog-omazureeventhubs
+Conflicts: rsyslog-omazureeventhubs
+Provides: rsyslog-omhttp
+Conflicts: rsyslog-omhttp
 Provides: rsyslog-openssl
 Conflicts: rsyslog-openssl
 #Provides: rsyslog-pgsql
 Conflicts: rsyslog-pgsql
+Provides: rsyslog-pmciscoios
+Conflicts: rsyslog-pmciscoios
+Provides: rsyslog-pmnormalize
+Conflicts: rsyslog-pmnormalize
 #Provides: rsyslog-rabbitmq
 Conflicts: rsyslog-rabbitmq
 Provides: rsyslog-relp
