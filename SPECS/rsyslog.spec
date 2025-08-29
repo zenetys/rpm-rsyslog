@@ -493,11 +493,10 @@ done
 %doc rsyslog-%{version}/COPYING*
 %doc rsyslog-%{version}/ChangeLog
 %doc %{_mandir}/*/*
-%{_sbindir}/rsyslogd
-%{_sbindir}/msggen
+%{_bindir}/lognormalizer
+%{_bindir}/rscryutil
+%{_bindir}/rsyslog-recover-qi.pl
 %dir %{_libdir}/rsyslog
-%{_libdir}/rsyslog/omelasticsearch.so
-%{_libdir}/rsyslog/pmlastmsg.so
 %{_libdir}/rsyslog/fmhash.so
 %{_libdir}/rsyslog/fmhttp.so
 %{_libdir}/rsyslog/fmpcre.so
@@ -506,6 +505,7 @@ done
 %{_libdir}/rsyslog/imdtls.so
 %{_libdir}/rsyslog/imfile.so
 %{_libdir}/rsyslog/imhttp.so
+%{_libdir}/rsyslog/imjournal.so
 %{_libdir}/rsyslog/imklog.so
 %{_libdir}/rsyslog/imkmsg.so
 %{_libdir}/rsyslog/immark.so
@@ -542,7 +542,9 @@ done
 %{_libdir}/rsyslog/mmtaghostname.so
 %{_libdir}/rsyslog/mmutf8fix.so
 %{_libdir}/rsyslog/omdtls.so
+%{_libdir}/rsyslog/omelasticsearch.so
 %{_libdir}/rsyslog/omhttp.so
+%{_libdir}/rsyslog/omjournal.so
 %{_libdir}/rsyslog/ommail.so
 %{_libdir}/rsyslog/omprog.so
 %{_libdir}/rsyslog/omrelp.so
@@ -554,15 +556,13 @@ done
 %{_libdir}/rsyslog/omudpspoof.so
 %{_libdir}/rsyslog/omuxsock.so
 %{_libdir}/rsyslog/pmciscoios.so
+%{_libdir}/rsyslog/pmlastmsg.so
 %{_libdir}/rsyslog/pmnormalize.so
 %{_libdir}/rsyslog/pmnull.so
 %{_libdir}/rsyslog/pmpanngfw.so
+%{_sbindir}/msggen
 %{_sbindir}/rsyslog_diag_hostname
-%{_libdir}/rsyslog/imjournal.so
-%{_libdir}/rsyslog/omjournal.so
-%{_bindir}/lognormalizer
-%{_bindir}/rscryutil
-%{_bindir}/rsyslog-recover-qi.pl
+%{_sbindir}/rsyslogd
 %config(noreplace) %{_sysconfdir}/rsyslog.conf
 %dir %{_sysconfdir}/rsyslog.d
 %config(noreplace) %{_sysconfdir}/sysconfig/rsyslog
