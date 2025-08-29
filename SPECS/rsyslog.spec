@@ -29,7 +29,7 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2506.0
+Version: 8.2508.0
 Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
@@ -46,6 +46,8 @@ Source303: http://download.rsyslog.com/libfastjson/%{libfastjson}.tar.gz
 Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
+
+Patch100: rsyslog-8.2508.0-fmpcre-build.patch
 
 Patch200: liblognorm-cef-first-extension.patch
 Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
@@ -71,6 +73,7 @@ BuildRequires: libuuid-devel
 BuildRequires: make
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
+BuildRequires: pcre-devel
 BuildRequires: pkgconfig
 BuildRequires: pkgconfig(libcurl)
 BuildRequires: zlib-devel
@@ -185,6 +188,7 @@ MySQL database support to rsyslog.
 
 cd rsyslog-%{version}
 # rsyslog patches
+%patch100 -p1
 cd ..
 
 cd %{liblognorm}
@@ -322,6 +326,7 @@ OPTIONS=(
   --enable-fmhash
   --enable-fmhash-xxhash
   --enable-fmunflatten
+  --enable-fmpcre
   # --enable-gssapi-krb5
   --enable-klog
   --enable-kmsg
@@ -365,6 +370,7 @@ OPTIONS=(
   --enable-mmdblookup
   --enable-mmfields
   --enable-mmpstrucdata
+  # --enable-mmaitag
   --enable-mmrfc5424addhmac
   --enable-mmsnmptrapd
   # --enable-mmkubernetes
@@ -400,6 +406,7 @@ OPTIONS=(
   # --enable-pmsnare
   --enable-pmpanngfw
   --enable-omudpspoof
+  --enable-omsendertrack
   --enable-omruleset
   --enable-omuxsock
   # --enable-omhdfs
@@ -493,6 +500,7 @@ done
 %{_libdir}/rsyslog/pmlastmsg.so
 %{_libdir}/rsyslog/fmhash.so
 %{_libdir}/rsyslog/fmhttp.so
+%{_libdir}/rsyslog/fmpcre.so
 %{_libdir}/rsyslog/fmunflatten.so
 %{_libdir}/rsyslog/imdiag.so
 %{_libdir}/rsyslog/imdtls.so
@@ -539,6 +547,7 @@ done
 %{_libdir}/rsyslog/omprog.so
 %{_libdir}/rsyslog/omrelp.so
 %{_libdir}/rsyslog/omruleset.so
+%{_libdir}/rsyslog/omsendertrack.so
 %{_libdir}/rsyslog/omsnmp.so
 %{_libdir}/rsyslog/omstdout.so
 %{_libdir}/rsyslog/omtesting.so
