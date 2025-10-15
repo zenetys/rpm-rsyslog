@@ -6,6 +6,7 @@
 #
 
 set -o pipefail
+set -f
 PROGNAME=${0##*/}
 SUFFIX="(tar\\.gz|tgz|tar\\.xz|tar\\.bz2|tbz|zip|(src\\.)?rpm)"
 CACHEDIR=${CACHEDIR:-/tmp/$PROGNAME}
@@ -17,7 +18,7 @@ function curl_github_api_pages() {
   pages=$(set -o pipefail; curl "${curlopts[@]}" -I "$1?per_page=100" |
     sed -nre 's,^link:.*[?&]page=([0-9]+)>; rel="last".*,\1,p') || return $?
   if [[ -z $pages ]]; then
-    curl "${curlopts[@]}" "$1"
+    curl "${curlopts[@]}" "$1?per_page=100"
   else
     for (( p = 1; p <= pages; p++ )); do
       curl "${curlopts[@]}" "$1?per_page=100&page=$p"
@@ -28,23 +29,45 @@ function curl_github_api_pages() {
 
 function get-data-lynx() {
   local url=$1 ; shift
-  lynx -dump "$url" | sed -n -r -e 's/^[ 0-9]+\. //p'
+  local expr=${1:-'s/^[ 0-9]+\. //p'}
+  lynx -dump "$url" | sed -n -r -e "$expr"
 }
 
 function get-data-json() {
   local url=$1 ; shift
+  local expression=${1:-.} ; shift
+  local pattern='(?<=")'${1:-'[a-z+]+://.+'}'(?=")' ; shift
   if [[ $url == https://api.github.com/* ]]; then
     curl_github_api_pages "$url"
   else
     curl "${curlopts[@]}" "$url"
-  fi |jq . |grep -Pio '(?<=")[a-z+]+://[^"]+'
+  fi |jq "$expression" |grep -Pio "$pattern"
+}
+
+function get-data-tags-from-path() {
+    local repo=$1; shift
+    local branch=$1; shift
+    local path=$1; shift
+    local tmpdir="/dev/shm/${PROGNAME}/src/${repo//[^[:alnum:]]/_}"
+    local last_hash
+    if [[ -d $tmpdir ]]; then
+        git -C "$tmpdir" fetch origin
+    else
+        mkdir -p "$tmpdir" || return 1
+        git clone "$repo" "$tmpdir" || return 1
+    fi
+    git -C "$tmpdir" checkout "origin/$branch" || return 1
+    last_hash=$(git -C "$tmpdir" log -1 --pretty=format:%H -- connectors/vmware/) || return 1
+    [[ -n $last_hash ]] || return 1
+    git -C "$tmpdir" tag --contains "$last_hash" |sort -V |head -n 1
 }
 
 function get-data() {
-  local method=$1 ; shift
+  local method=( ${1//:/$IFS} ) ; shift
   if declare -F -f "$FUNCNAME-$method"; then
-    "$FUNCNAME-$method" "$@" || return 1
+    "$FUNCNAME-$method" "$1" "${method[@]:1}" || return 1
   else
+    echo "[ERROR] not implemented: $FUNCNAME-$method" >&2
     return 1
   fi
 }
@@ -78,8 +101,12 @@ function check-updates() {
   elif [[ ${pattern:0:1} == "/" ]] ; then
     s=$pattern
     pattern=".*/${s%/*}/(${s##*/}\\.$SUFFIX)"
+  elif [[ ${pattern:0:1} == "<" ]]; then
+    pattern=".*\\<(${pattern:1})"
   elif [[ ${pattern:0:1} == "=" ]]; then
     pattern=".*/(${pattern:1})"
+  elif [[ ${pattern:0:1} == "@" ]]; then
+    pattern="(${pattern:1})"
   else
     pattern=".*/($pattern\\.$SUFFIX)"
   fi
@@ -120,8 +147,14 @@ function check-updates() {
     [[ $VERBOSE ]] &&
        echo "[DEBUG] $current ? ${ordered[0]} < ${ordered[1]}" >&2
     if [[ ${ordered[1]} != $current ]]; then
-      echo "** $base ($current) need update to $version **"
-      return 1
+      if [[ $FILENAME ]] &&
+         (echo "$base $version" |grep -qFx -f <(sed -nre 's,^#ignore ([^ ]+) ([^/].*),\1 \2,p' "$FILENAME") ||
+          echo "$base $version" |grep -qEx -f <(sed -nre 's,^#ignore ([^ ]+) /([^/]*)/,\1 \2,p' "$FILENAME")); then
+        if [[ $VERBOSE ]]; then echo "[DEBUG] ignored version: $version" >&2; fi
+      else
+        echo "** $base ($current) need update to $version **"
+        return 1
+      fi
     fi
   fi
 }
@@ -139,7 +172,7 @@ while [[ $# -gt 0 ]] ; do
 done
 
 [[ -d $CACHEDIR ]] || mkdir -p $CACHEDIR
-[[ -z $1 && -e $PROGNAME.def ]] && FILENAME=$PROGNAME.def
+[[ -z $FILENAME && -z $1 && -e $PROGNAME.def ]] && FILENAME=$PROGNAME.def
 
 if [[ $FILENAME ]] ; then
   status=0
