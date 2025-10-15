@@ -16,7 +16,7 @@
 %global __requires_exclude_from ^%{_bindir}/rsyslog-recover-qi\\.pl$
 
 %define libestr                 libestr-0.1.11
-%define liblognorm              liblognorm-2.0.6
+%define liblognorm              liblognorm-2.0.7
 %define liblogging              liblogging-1.0.6
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.12.0
@@ -30,7 +30,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2508.0
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -49,9 +49,6 @@ Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_ve
 
 Patch100: rsyslog-8.2508.0-fmpcre-build.patch
 
-Patch200: liblognorm-cef-first-extension.patch
-Patch201: liblognorm-parseNameValue-fix-no-quoting-support.patch
-Patch202: liblognorm-string-rulebase-bugfix-segfault-when-using-LF-in-jso.patch
 Patch203: liblognorm-custom-type-memory-leak.patch
 Patch204: liblognorm-string-perm-chars-overflow.patch
 
@@ -192,9 +189,6 @@ cd rsyslog-%{version}
 cd ..
 
 cd %{liblognorm}
-%patch200 -p1
-%patch201 -p1
-%patch202 -p1
 %patch203 -p1
 %patch204 -p1
 cd ..

@@ -1,6 +1,6 @@
 rsyslog 8.2508.0 lynx https://www.rsyslog.com/downloads/download-v8-stable/
 libestr 0.1.11 lynx https://libestr.adiscon.com/download/
-liblognorm 2.0.6 lynx https://www.liblognorm.com/download/
+liblognorm 2.0.7 lynx https://www.liblognorm.com/download/
 liblogging 1.0.6 lynx http://download.rsyslog.com/liblogging/
 libfastjson 1.2304.0 lynx http://download.rsyslog.com/libfastjson/
 librelp 1.12.0 lynx http://download.rsyslog.com/librelp/
