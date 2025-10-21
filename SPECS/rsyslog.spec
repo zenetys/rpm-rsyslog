@@ -29,8 +29,8 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2508.0
-Release: 3%{?dist}.zenetys
+Version: 8.2510.0
+Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -114,12 +114,18 @@ Provides: rsyslog-mmfields
 Conflicts: rsyslog-mmfields
 Provides: rsyslog-mmjsonparse
 Conflicts: rsyslog-mmjsonparse
+Provides: rsyslog-mmjsontransform
+Conflicts: rsyslog-mmjsontransform
 Provides: rsyslog-mmkubernetes
 Conflicts: rsyslog-mmkubernetes
+Provides: rsyslog-mmleefparse
+Conflicts: rsyslog-mmleefparse
 Provides: rsyslog-mmnormalize
 Conflicts: rsyslog-mmnormalize
 Provides: rsyslog-mmrm1stspace
 Conflicts: rsyslog-mmrm1stspace
+Provides: rsyslog-mmsnareparse
+Conflicts: rsyslog-mmsnareparse
 Provides: rsyslog-mmsnmptrapd
 Conflicts: rsyslog-mmsnmptrapd
 Provides: rsyslog-mmtaghostname
@@ -354,7 +360,9 @@ OPTIONS=(
   --enable-fmhttp
 
   --enable-mmnormalize
+  --enable-mmleefparse
   --enable-mmjsonparse
+  --enable-mmjsontransform
   # --enable-mmgrok
   --enable-mmaudit
   --enable-mmanon
@@ -368,6 +376,7 @@ OPTIONS=(
   --enable-mmpstrucdata
   # --enable-mmaitag
   --enable-mmrfc5424addhmac
+  --enable-mmsnareparse
   --enable-mmsnmptrapd
   --enable-mmkubernetes
 
@@ -534,9 +543,12 @@ done
 %{_libdir}/rsyslog/mmexternal.so
 %{_libdir}/rsyslog/mmfields.so
 %{_libdir}/rsyslog/mmjsonparse.so
+%{_libdir}/rsyslog/mmjsontransform.so
 %{_libdir}/rsyslog/mmkubernetes.so
+%{_libdir}/rsyslog/mmleefparse.so
 %{_libdir}/rsyslog/mmnormalize.so
 %{_libdir}/rsyslog/mmpstrucdata.so
+%{_libdir}/rsyslog/mmsnareparse.so
 %{_libdir}/rsyslog/mmrfc5424addhmac.so
 %{_libdir}/rsyslog/mmrm1stspace.so
 %{_libdir}/rsyslog/mmsequence.so
