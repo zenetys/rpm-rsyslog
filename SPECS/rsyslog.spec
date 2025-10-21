@@ -401,7 +401,7 @@ OPTIONS=(
   --enable-pmnull
   --enable-pmnormalize
   --enable-pmaixforwardedfrom
-  # --enable-pmsnare
+  --enable-pmsnare
   --enable-pmpanngfw
   --enable-omudpspoof
   --enable-omsendertrack
@@ -561,6 +561,7 @@ done
 %{_libdir}/rsyslog/pmlastmsg.so
 %{_libdir}/rsyslog/pmnormalize.so
 %{_libdir}/rsyslog/pmnull.so
+%{_libdir}/rsyslog/pmsnare.so
 %{_libdir}/rsyslog/pmpanngfw.so
 %{_sbindir}/msggen
 %{_sbindir}/rsyslog_diag_hostname
