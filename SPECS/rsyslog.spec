@@ -73,6 +73,7 @@ BuildRequires: openssl-devel
 BuildRequires: pcre-devel
 BuildRequires: pkgconfig
 BuildRequires: pkgconfig(libcurl)
+BuildRequires: pkgconfig(libzstd)
 BuildRequires: zlib-devel
 
 BuildRequires: systemd-devel >= 219-39
@@ -345,6 +346,7 @@ OPTIONS=(
   --enable-gnutls
   # --enable-mbedtls
   --enable-libgcrypt
+  --enable-libzstd
   --enable-rsyslogrt
   --enable-rsyslogd
   # --enable-extended-tests
@@ -526,6 +528,7 @@ done
 %{_libdir}/rsyslog/lmtcpclt.so
 %{_libdir}/rsyslog/lmtcpsrv.so
 %{_libdir}/rsyslog/lmzlibw.so
+%{_libdir}/rsyslog/lmzstdw.so
 %{_libdir}/rsyslog/mmanon.so
 %{_libdir}/rsyslog/mmaudit.so
 %{_libdir}/rsyslog/mmcount.so
