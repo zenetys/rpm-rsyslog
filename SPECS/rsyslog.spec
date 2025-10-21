@@ -341,6 +341,7 @@ OPTIONS=(
   --enable-elasticsearch
   # --enable-clickhouse
   --enable-openssl
+  --enable-opensslcrypto
   --enable-gnutls
   --enable-libgcrypt
   --enable-rsyslogrt
