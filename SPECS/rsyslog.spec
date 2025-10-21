@@ -115,7 +115,7 @@ Provides: rsyslog-mmfields
 Conflicts: rsyslog-mmfields
 Provides: rsyslog-mmjsonparse
 Conflicts: rsyslog-mmjsonparse
-#Provides: rsyslog-mmkubernetes
+Provides: rsyslog-mmkubernetes
 Conflicts: rsyslog-mmkubernetes
 Provides: rsyslog-mmnormalize
 Conflicts: rsyslog-mmnormalize
@@ -369,7 +369,7 @@ OPTIONS=(
   # --enable-mmaitag
   --enable-mmrfc5424addhmac
   --enable-mmsnmptrapd
-  # --enable-mmkubernetes
+  --enable-mmkubernetes
 
   --enable-omhttp
   # --enable-omfile-hardened
@@ -530,6 +530,7 @@ done
 %{_libdir}/rsyslog/mmexternal.so
 %{_libdir}/rsyslog/mmfields.so
 %{_libdir}/rsyslog/mmjsonparse.so
+%{_libdir}/rsyslog/mmkubernetes.so
 %{_libdir}/rsyslog/mmnormalize.so
 %{_libdir}/rsyslog/mmpstrucdata.so
 %{_libdir}/rsyslog/mmrfc5424addhmac.so
