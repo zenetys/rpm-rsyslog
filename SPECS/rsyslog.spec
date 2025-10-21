@@ -82,9 +82,7 @@ Requires(preun): systemd
 Requires(postun): systemd
 
 Requires: bash >= 2.0
-Requires: gnutls
 Requires: logrotate >= 3.5.2
-Requires: openssl-libs
 
 Provides: rsyslog
 Conflicts: rsyslog
