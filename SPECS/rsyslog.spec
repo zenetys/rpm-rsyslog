@@ -382,6 +382,7 @@ OPTIONS=(
   --enable-libfaketime
   # --enable-helgrind
   --enable-imdiag
+  --enable-imdocker
   --enable-imdtls
   --enable-imfile
   --enable-imhttp
@@ -500,6 +501,7 @@ done
 %{_libdir}/rsyslog/fmunflatten.so
 %{_libdir}/rsyslog/imdiag.so
 %{_libdir}/rsyslog/imdtls.so
+%{_libdir}/rsyslog/imdocker.so
 %{_libdir}/rsyslog/imfile.so
 %{_libdir}/rsyslog/imhttp.so
 %{_libdir}/rsyslog/imjournal.so
