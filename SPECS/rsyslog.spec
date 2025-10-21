@@ -400,7 +400,7 @@ OPTIONS=(
   --enable-pmciscoios
   --enable-pmnull
   --enable-pmnormalize
-  # --enable-pmaixforwardedfrom
+  --enable-pmaixforwardedfrom
   # --enable-pmsnare
   --enable-pmpanngfw
   --enable-omudpspoof
@@ -556,6 +556,7 @@ done
 %{_libdir}/rsyslog/omtesting.so
 %{_libdir}/rsyslog/omudpspoof.so
 %{_libdir}/rsyslog/omuxsock.so
+%{_libdir}/rsyslog/pmaixforwardedfrom.so
 %{_libdir}/rsyslog/pmciscoios.so
 %{_libdir}/rsyslog/pmlastmsg.so
 %{_libdir}/rsyslog/pmnormalize.so
