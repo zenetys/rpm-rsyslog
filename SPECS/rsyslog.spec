@@ -348,8 +348,8 @@ OPTIONS=(
   --enable-rsyslogrt
   --enable-rsyslogd
   # --enable-extended-tests
-  --enable-mysql-tests
-  --enable-pgsql-tests
+  # --enable-mysql-tests
+  # --enable-pgsql-tests
   --enable-mail
   --enable-fmhttp
 
