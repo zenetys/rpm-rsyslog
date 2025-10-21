@@ -398,6 +398,7 @@ OPTIONS=(
   --enable-pmlastmsg
   # --enable-pmcisconames
   --enable-pmciscoios
+  --enable-pmdb2diag
   --enable-pmnull
   --enable-pmnormalize
   --enable-pmaixforwardedfrom
@@ -558,6 +559,7 @@ done
 %{_libdir}/rsyslog/omuxsock.so
 %{_libdir}/rsyslog/pmaixforwardedfrom.so
 %{_libdir}/rsyslog/pmciscoios.so
+%{_libdir}/rsyslog/pmdb2diag.so
 %{_libdir}/rsyslog/pmlastmsg.so
 %{_libdir}/rsyslog/pmnormalize.so
 %{_libdir}/rsyslog/pmnull.so
