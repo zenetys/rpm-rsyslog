@@ -339,7 +339,7 @@ OPTIONS=(
   --enable-snmp
   --enable-uuid
   --enable-elasticsearch
-  # --enable-clickhouse
+  --enable-clickhouse
   --enable-openssl
   --enable-opensslcrypto
   --enable-gnutls
@@ -538,6 +538,7 @@ done
 %{_libdir}/rsyslog/mmsnmptrapd.so
 %{_libdir}/rsyslog/mmtaghostname.so
 %{_libdir}/rsyslog/mmutf8fix.so
+%{_libdir}/rsyslog/omclickhouse.so
 %{_libdir}/rsyslog/omdtls.so
 %{_libdir}/rsyslog/omelasticsearch.so
 %{_libdir}/rsyslog/omhttp.so
