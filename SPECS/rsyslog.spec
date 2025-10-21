@@ -318,7 +318,7 @@ rsyslog_configure_opts+=( APU_LIBS='-laprutil-1' )
 OPTIONS=(
   --enable-regexp
   --enable-fmhash
-  --enable-fmhash-xxhash
+  # --enable-fmhash-xxhash
   --enable-fmunflatten
   --enable-fmpcre
   # --enable-gssapi-krb5
