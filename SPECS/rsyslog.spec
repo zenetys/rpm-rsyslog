@@ -343,6 +343,7 @@ OPTIONS=(
   --enable-openssl
   --enable-opensslcrypto
   --enable-gnutls
+  # --enable-mbedtls
   --enable-libgcrypt
   --enable-rsyslogrt
   --enable-rsyslogd
@@ -371,7 +372,7 @@ OPTIONS=(
   # --enable-mmkubernetes
 
   --enable-omhttp
-  #--enable-omfile-hardened
+  # --enable-omfile-hardened
   --enable-relp
   --enable-omrelp-default-port
   # --enable-ksi-ls12
@@ -388,6 +389,7 @@ OPTIONS=(
   # --enable-imsolaris
   --enable-imptcp
   --enable-impstats
+  # --enable-imtuxedoulog
   --enable-omdtls
   --enable-omprog
   --enable-omstdout
