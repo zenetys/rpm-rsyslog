@@ -16,7 +16,7 @@
 %global __requires_exclude_from ^%{_bindir}/rsyslog-recover-qi\\.pl$
 
 %define libestr                 libestr-0.1.11
-%define liblognorm              liblognorm-2.0.7
+%define liblognorm              liblognorm-2.0.8
 %define liblogging              liblogging-1.0.6
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.12.0
@@ -30,7 +30,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2510.0
-Release: 1%{?dist}.zenetys
+Release: 2%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -48,9 +48,6 @@ Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxmin
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
 Patch100: rsyslog-8.2508.0-fmpcre-build.patch
-
-Patch203: liblognorm-custom-type-memory-leak.patch
-Patch204: liblognorm-string-perm-chars-overflow.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -191,11 +188,6 @@ MySQL database support to rsyslog.
 cd rsyslog-%{version}
 # rsyslog patches
 %patch100 -p1
-cd ..
-
-cd %{liblognorm}
-%patch203 -p1
-%patch204 -p1
 cd ..
 
 %build
