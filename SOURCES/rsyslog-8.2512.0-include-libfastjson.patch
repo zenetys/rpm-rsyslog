@@ -1,0 +1,26 @@
+diff --git a/plugins/imkafka/imkafka.c b/plugins/imkafka/imkafka.c
+index e68dd2c1c..7ceb26e7a 100644
+--- a/plugins/imkafka/imkafka.c
++++ b/plugins/imkafka/imkafka.c
+@@ -54,7 +54,7 @@
+ /* If your build already injects the header, you may omit this include.
+    Otherwise, prefer the canonical libfastjson path: */
+ // #include <json.h>
+-#include <libfastjson/json.h>
++#include <json.h>
+ 
+ MODULE_TYPE_INPUT;
+ MODULE_TYPE_NOKEEP;
+diff --git a/plugins/impstats/impstats.c b/plugins/impstats/impstats.c
+index eb6ba40b1..db0e1c4ba 100644
+--- a/plugins/impstats/impstats.c
++++ b/plugins/impstats/impstats.c
+@@ -51,7 +51,7 @@
+ #include "prop.h"
+ #include "ruleset.h"
+ #include "parserif.h"
+-#include <libfastjson/json.h> /* libfastjson for robust JSON parsing in Zabbix collector */
++#include <json.h> /* libfastjson for robust JSON parsing in Zabbix collector */
+ 
+ MODULE_TYPE_INPUT
+ MODULE_TYPE_NOKEEP
