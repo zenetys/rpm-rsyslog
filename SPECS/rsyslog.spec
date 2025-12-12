@@ -30,7 +30,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2512.0
-Release: 1%{?dist}.zenetys
+Release: 2%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -49,6 +49,8 @@ Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_ve
 
 Patch100: rsyslog-8.2508.0-fmpcre-build.patch
 Patch101: rsyslog-8.2512.0-include-libfastjson.patch
+
+Patch203: liblognorm-custom-type-memory-leak.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -190,6 +192,10 @@ cd rsyslog-%{version}
 # rsyslog patches
 %patch100 -p1
 %patch101 -p1
+cd ..
+
+cd %{liblognorm}
+%patch203 -p1
 cd ..
 
 %build
