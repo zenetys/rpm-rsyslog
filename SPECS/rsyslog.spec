@@ -17,7 +17,7 @@
 
 %define libestr                 libestr-0.1.11
 %define liblognorm              liblognorm-2.0.9
-%define liblogging              liblogging-1.0.6
+%define liblogging              liblogging-1.0.8
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.12.0
 %define libmaxminddb_version    1.12.2
@@ -30,7 +30,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2512.0
-Release: 3%{?dist}.zenetys
+Release: 4%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
