@@ -1,6 +1,6 @@
 | <nobr>Package name</nobr> | <nobr>Supported targets</nobr> | Includes |
 | :--- | :--- | :--- |
-| rsyslog8z, <nobr>rsyslog8z-mysql</nobr> | el8, el9 | Linked static: libestr, liblognorm, liblognorm, libfastjson, librelp, libmaxminddb, civetweb |
+| rsyslog8z, <nobr>rsyslog8z-mysql</nobr> | el8, el9, el10 | Linked static: libestr, liblognorm, liblognorm, libfastjson, librelp, libmaxminddb, civetweb |
 <br/>
 
 ## Build:
@@ -13,6 +13,7 @@ images from internet if not already downloaded.
 ```
 $ ./rpmbuild-docker -d el8
 $ ./rpmbuild-docker -d el9
+$ ./rpmbuild-docker -d el10
 ```
 
 ## Prebuilt packages:

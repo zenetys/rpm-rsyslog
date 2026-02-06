@@ -4,7 +4,7 @@
 # Copyright: 2019
 #
 
-# Supported targets: el8, el9
+# Supported targets: el8, el9, el10
 # Replace distro package with: dnf install rsyslog8z --allowerasing
 #
 # This package is not compatible with standard rsyslog packages from the
@@ -13,6 +13,7 @@
 # packages found in el8, el9, el10s, and packages names found in adiscon
 # repo, as well as rsyslog-imhttp built in neither.
 
+%global source_date_epoch_from_changelog 0
 %global __requires_exclude_from ^%{_bindir}/rsyslog-recover-qi\\.pl$
 
 %define libestr                 libestr-0.1.11
@@ -49,6 +50,7 @@ Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_ve
 
 Patch100: rsyslog-8.2508.0-fmpcre-build.patch
 Patch101: rsyslog-8.2512.0-include-libfastjson.patch
+Patch102: rsyslog-8.2512.0-fmpcre-libpcre2.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -68,7 +70,11 @@ BuildRequires: libuuid-devel
 BuildRequires: make
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
+%if 0%{?rhel} >= 10
+BuildRequires: pcre2-devel
+%else
 BuildRequires: pcre-devel
+%endif
 BuildRequires: pkgconfig
 BuildRequires: pkgconfig(libcurl)
 BuildRequires: pkgconfig(libzstd)
@@ -190,6 +196,9 @@ cd rsyslog-%{version}
 # rsyslog patches
 %patch100 -p1
 %patch101 -p1
+%if 0%{?rhel} >= 10
+%patch102 -p1
+%endif
 cd ..
 
 %build
