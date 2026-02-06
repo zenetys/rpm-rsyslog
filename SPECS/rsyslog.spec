@@ -30,7 +30,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2512.0
-Release: 4%{?dist}.zenetys
+Release: 5%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -340,6 +340,9 @@ OPTIONS=(
   --enable-elasticsearch
   --enable-clickhouse
   --enable-openssl
+%if 0%{?rhel} >= 9
+  --enable-openssl-crypto-provider
+%endif
   --enable-gnutls
   # --enable-mbedtls
   --enable-libgcrypt
@@ -519,6 +522,9 @@ done
 %{_libdir}/rsyslog/imudp.so
 %{_libdir}/rsyslog/imuxsock.so
 %{_libdir}/rsyslog/lmcry_gcry.so
+%if 0%{?rhel} >= 9
+%{_libdir}/rsyslog/lmcry_ossl.so
+%endif
 %{_libdir}/rsyslog/lmnet.so
 %{_libdir}/rsyslog/lmnetstrms.so
 %{_libdir}/rsyslog/lmnsd_gtls.so
