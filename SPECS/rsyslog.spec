@@ -31,7 +31,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2512.0
-Release: 5%{?dist}.zenetys
+Release: 6%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -48,9 +48,7 @@ Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
-Patch100: rsyslog-8.2508.0-fmpcre-build.patch
 Patch101: rsyslog-8.2512.0-include-libfastjson.patch
-Patch102: rsyslog-8.2512.0-fmpcre-libpcre2.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -70,11 +68,6 @@ BuildRequires: libuuid-devel
 BuildRequires: make
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
-%if 0%{?rhel} >= 10
-BuildRequires: pcre2-devel
-%else
-BuildRequires: pcre-devel
-%endif
 BuildRequires: pkgconfig
 BuildRequires: pkgconfig(libcurl)
 BuildRequires: pkgconfig(libzstd)
@@ -194,11 +187,7 @@ MySQL database support to rsyslog.
 
 cd rsyslog-%{version}
 # rsyslog patches
-%patch100 -p1
 %patch101 -p1
-%if 0%{?rhel} >= 10
-%patch102 -p1
-%endif
 cd ..
 
 %build
@@ -328,7 +317,7 @@ OPTIONS=(
   --enable-fmhash
   # --enable-fmhash-xxhash
   --enable-fmunflatten
-  --enable-fmpcre
+  # --enable-fmpcre
   # --enable-gssapi-krb5
   --enable-klog
   --enable-kmsg
@@ -512,7 +501,6 @@ done
 %dir %{_libdir}/rsyslog
 %{_libdir}/rsyslog/fmhash.so
 %{_libdir}/rsyslog/fmhttp.so
-%{_libdir}/rsyslog/fmpcre.so
 %{_libdir}/rsyslog/fmunflatten.so
 %{_libdir}/rsyslog/imdiag.so
 %{_libdir}/rsyslog/imdtls.so
