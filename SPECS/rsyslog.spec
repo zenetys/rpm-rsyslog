@@ -467,7 +467,7 @@ install -D -p -m 644 %{SOURCE12} %{buildroot}%{_sysconfdir}/logrotate.d/syslog
 %else
 install -D -p -m 644 %{SOURCE12} %{buildroot}%{_sysconfdir}/logrotate.d/rsyslog
 %endif
-install -D -p -m 755 %{SOURCE15} %{buildroot}%{_unitdir}/rsyslog.service
+install -D -p -m 644 %{SOURCE15} %{buildroot}%{_unitdir}/rsyslog.service
 
 cat rsyslog-%{version}/tools/recover_qi.pl |
   tr -d '\r' > %{buildroot}%{_bindir}/rsyslog-recover-qi.pl
