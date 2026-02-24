@@ -30,8 +30,8 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2512.0
-Release: 6%{?dist}.zenetys
+Version: 8.2602.0
+Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -48,6 +48,8 @@ Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
+Patch101: rsyslog-8.2602.0-liboverride-tests.patch
+
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
 Packager: Benoit DOLEZ <bdolez@zenetys.com>
@@ -63,12 +65,15 @@ BuildRequires: libgcrypt-devel
 BuildRequires: libnet-devel
 BuildRequires: libtool
 BuildRequires: libuuid-devel
+BuildRequires: libyaml-devel
 BuildRequires: make
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
 BuildRequires: pkgconfig(libcurl)
 BuildRequires: pkgconfig(libzstd)
+BuildRequires: protobuf-c-devel
+BuildRequires: snappy-devel
 BuildRequires: zlib-devel
 
 BuildRequires: systemd-devel >= 219-39
@@ -185,6 +190,7 @@ MySQL database support to rsyslog.
 
 cd rsyslog-%{version}
 # rsyslog patches
+%patch -P 101 -p1
 cd ..
 
 %build
@@ -392,6 +398,7 @@ OPTIONS=(
   # --enable-imsolaris
   --enable-imptcp
   --enable-impstats
+  --enable-impstats-push
   # --enable-imtuxedoulog
   --enable-omdtls
   --enable-omprog
