@@ -48,8 +48,6 @@ Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
-Patch101: rsyslog-8.2512.0-include-libfastjson.patch
-
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
 Packager: Benoit DOLEZ <bdolez@zenetys.com>
@@ -187,7 +185,6 @@ MySQL database support to rsyslog.
 
 cd rsyslog-%{version}
 # rsyslog patches
-%patch101 -p1
 cd ..
 
 %build
@@ -238,6 +235,8 @@ liblognorm_configure_opts+=( LIBESTR_LIBS="-L%{builddir}/%{libestr}/src/.libs -l
     ${libfastjson_configure_cflags:+"CFLAGS=$libfastjson_configure_cflags"} \
     ${libfastjson_configure_ldflags:+"LDFLAGS=$libfastjson_configure_ldflags"}
   make V=1 %{?_smp_mflags}
+  # impstats and imkafka include libfastjson/json.h
+  ln -s . libfastjson
 )
 rsyslog_configure_opts+=( LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}" )
 rsyslog_configure_opts+=( LIBFASTJSON_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
