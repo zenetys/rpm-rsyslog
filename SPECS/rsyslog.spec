@@ -49,6 +49,7 @@ Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxmin
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
 Patch101: rsyslog-8.2602.0-liboverride-tests.patch
+Patch102: rsyslog-8.2602.0-configure-omotel.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -191,6 +192,7 @@ MySQL database support to rsyslog.
 cd rsyslog-%{version}
 # rsyslog patches
 %patch -P 101 -p1
+%patch -P 102 -p1
 cd ..
 
 %build
@@ -246,6 +248,8 @@ liblognorm_configure_opts+=( LIBESTR_LIBS="-L%{builddir}/%{libestr}/src/.libs -l
 )
 rsyslog_configure_opts+=( LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}" )
 rsyslog_configure_opts+=( LIBFASTJSON_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
+rsyslog_configure_opts+=( OMOTEL_HTTP_CFLAGS="-I%{builddir}/%{libfastjson}/libfastjson" )
+rsyslog_configure_opts+=( OMOTEL_HTTP_LIBS="-lcurl -L%{builddir}/%{libfastjson}/.libs -lfastjson" )
 liblognorm_configure_opts+=( LIBFASTJSON_CFLAGS="-I%{builddir}/%{libfastjson}" )
 liblognorm_configure_opts+=( LIBFASTJSON_LIBS="-L%{builddir}/%{libfastjson}/.libs -lfastjson" )
 # some components may uses JSON_C variables instead
@@ -413,6 +417,7 @@ OPTIONS=(
   --enable-pmaixforwardedfrom
   --enable-pmsnare
   --enable-pmpanngfw
+  --enable-omotel
   --enable-omudpspoof
   --enable-omsendertrack
   --enable-omruleset
@@ -570,6 +575,7 @@ done
 %{_libdir}/rsyslog/omsnmp.so
 %{_libdir}/rsyslog/omstdout.so
 %{_libdir}/rsyslog/omtesting.so
+%{_libdir}/rsyslog/omotel.so
 %{_libdir}/rsyslog/omudpspoof.so
 %{_libdir}/rsyslog/omuxsock.so
 %{_libdir}/rsyslog/pmaixforwardedfrom.so

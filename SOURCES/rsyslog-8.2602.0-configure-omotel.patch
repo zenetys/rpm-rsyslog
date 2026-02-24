@@ -1,0 +1,14 @@
+diff --git a/configure.ac b/configure.ac
+index 333fe9054..0dee6ab2c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2759,9 +2759,6 @@ AC_ARG_ENABLE(omotel,
+ )
+ OMOTEL_HTTP_CFLAGS=""
+ OMOTEL_HTTP_LIBS=""
+-if test "x$enable_omotel" = "xyes"; then
+-        PKG_CHECK_MODULES([OMOTEL_HTTP], [libcurl libfastjson])
+-fi
+ AC_SUBST([OMOTEL_HTTP_CFLAGS])
+ AC_SUBST([OMOTEL_HTTP_LIBS])
+ AM_CONDITIONAL(ENABLE_OMOTEL, test x$enable_omotel = xyes)
