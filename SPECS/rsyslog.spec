@@ -31,7 +31,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2602.0
-Release: 3%{?dist}.zenetys
+Release: 5%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -50,6 +50,8 @@ Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_ve
 
 Patch101: rsyslog-8.2602.0-liboverride-tests.patch
 Patch102: rsyslog-8.2602.0-configure-omotel.patch
+Patch103: rsyslog-8.2602.0-omelasticsearch-suspend-bad-http-status-1.patch
+Patch104: rsyslog-8.2602.0-omelasticsearch-suspend-bad-http-status-2.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -193,6 +195,8 @@ cd rsyslog-%{version}
 # rsyslog patches
 %patch -P 101 -p1
 %patch -P 102 -p1
+%patch -P 103 -p1
+%patch -P 104 -p1
 cd ..
 
 %build

@@ -1,0 +1,49 @@
+From 7c51b74d4929573ef072aee64c210826df5adcc8 Mon Sep 17 00:00:00 2001
+From: Julien Thomas <jthomas@zenetys.com>
+Date: Tue, 31 Mar 2026 04:59:34 +0200
+Subject: [PATCH] omelasticsearch: check HTTP status code in checkConn health
+ check
+
+checkConn() only verified that curl_easy_perform() succeeded, without
+checking the HTTP response status code. When a reverse proxy (e.g.
+HAProxy) returns a non-2xx response to the _cat/health request, curl
+still returns CURLE_OK since the HTTP exchange completed successfully.
+This caused tryResume to immediately resume a suspended action, leading
+to a tight suspend/resume loop.
+
+Add an HTTP status code check so that checkConn only reports success
+when the health check endpoint returns a 2xx response.
+---
+ plugins/omelasticsearch/omelasticsearch.c | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/plugins/omelasticsearch/omelasticsearch.c b/plugins/omelasticsearch/omelasticsearch.c
+index e2b58386c..a547bc10d 100644
+--- a/plugins/omelasticsearch/omelasticsearch.c
++++ b/plugins/omelasticsearch/omelasticsearch.c
+@@ -890,11 +890,17 @@ static rsRetVal ATTR_NONNULL() checkConn(wrkrInstanceData_t *const pWrkrData) {
+         free(healthUrl);
+ 
+         if (res == CURLE_OK) {
+-            DBGPRINTF(
+-                "omelasticsearch: checkConn %s completed with success "
+-                "on attempt %d\n",
+-                serverUrl, i);
+-            ABORT_FINALIZE(RS_RET_OK);
++            long httpStatus = 0;
++            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
++            if (httpStatus >= 200 && httpStatus <= 299) {
++                DBGPRINTF(
++                    "omelasticsearch: checkConn %s completed with success "
++                    "on attempt %d\n",
++                    serverUrl, i);
++                ABORT_FINALIZE(RS_RET_OK);
++            }
++            DBGPRINTF("omelasticsearch: checkConn %s returned HTTP status %ld "
++                      "on attempt %d\n", serverUrl, httpStatus, i);
+         }
+ 
+         DBGPRINTF("omelasticsearch: checkConn %s failed on attempt %d: %s\n", serverUrl, i, curl_easy_strerror(res));
+-- 
+2.53.0
+

@@ -1,0 +1,44 @@
+From ce736c01efa410594bc5fd6865c0871cab40efad Mon Sep 17 00:00:00 2001
+From: Julien Thomas <jthomas@zenetys.com>
+Date: Tue, 31 Mar 2026 04:15:47 +0200
+Subject: [PATCH] omelasticsearch: suspend action on non-2xx HTTP status codes
+
+When a reverse proxy (e.g. HAProxy) sits in front of Elasticsearch and
+returns non-2xx responses (such as 503 when all backends are down), the
+module would attempt to parse the response as an Elasticsearch bulk
+reply. This would fail with either "could not parse JSON result" (for
+HTML responses) or "bulkmode insert does not return array" (for JSON
+responses without an "items" array), both returning error codes that
+do not trigger action suspension. As a result, the module would enter
+an infinite retry loop, flooding the logs with error messages.
+
+Add an HTTP status code check in curlPost() for any response outside
+the 200-299 range, returning RS_RET_SUSPENDED so the action properly
+backs off and retries after the configured suspension interval.
+---
+ plugins/omelasticsearch/omelasticsearch.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/plugins/omelasticsearch/omelasticsearch.c b/plugins/omelasticsearch/omelasticsearch.c
+index 569ceb2c9..e2b58386c 100644
+--- a/plugins/omelasticsearch/omelasticsearch.c
++++ b/plugins/omelasticsearch/omelasticsearch.c
+@@ -1968,6 +1968,15 @@ static rsRetVal ATTR_NONNULL(1, 2)
+         ABORT_FINALIZE(RS_RET_SUSPENDED);
+     }
+ 
++    if (pWrkrData->httpStatusCode < 200 || pWrkrData->httpStatusCode > 299) {
++        STATSCOUNTER_INC(indexHTTPReqFail, mutIndexHTTPReqFail);
++        STATSCOUNTER_ADD(indexHTTPFail, mutIndexHTTPFail, nmsgs);
++        LogError(0, RS_RET_SUSPENDED,
++                 "omelasticsearch: server returned unexpected HTTP status code %ld",
++                 pWrkrData->httpStatusCode);
++        ABORT_FINALIZE(RS_RET_SUSPENDED);
++    }
++
+     if (pWrkrData->pData->rebindInterval > -1) pWrkrData->nOperations++;
+ 
+     if (pWrkrData->reply == NULL) {
+-- 
+2.53.0
+
