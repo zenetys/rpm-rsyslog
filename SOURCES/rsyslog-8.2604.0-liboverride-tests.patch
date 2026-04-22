@@ -1,0 +1,20 @@
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index b605623d5..104ddab18 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -1959,6 +1959,7 @@ CLEANFILES+= \
+ 
+ pkglib_LTLIBRARIES =
+ 
++if ENABLE_TESTBENCH
+ pkglib_LTLIBRARIES += liboverride_gethostname.la
+ liboverride_gethostname_la_SOURCES = override_gethostname.c
+ liboverride_gethostname_la_CFLAGS =
+@@ -2022,7 +2023,6 @@ runtime_unit_linkedlist_CPPFLAGS += $(LIBLOGGING_STDLOG_CFLAGS)
+ runtime_unit_stringbuf_CPPFLAGS += $(LIBLOGGING_STDLOG_CFLAGS)
+ endif
+ 
+-if ENABLE_TESTBENCH
+ check_PROGRAMS += $(TESTRUNS) ourtail tcpflood chkseq msleep randomgen \
+ 	diagtalker uxsockrcvr syslog_caller inputfilegen minitcpsrv \
+ 	omrelp_dflt_port \

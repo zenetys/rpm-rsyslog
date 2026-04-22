@@ -30,8 +30,8 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2602.0
-Release: 5%{?dist}.zenetys
+Version: 8.2604.0
+Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -48,8 +48,8 @@ Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
-Patch101: rsyslog-8.2602.0-liboverride-tests.patch
-Patch102: rsyslog-8.2602.0-configure-omotel.patch
+Patch101: rsyslog-8.2604.0-liboverride-tests.patch
+Patch102: rsyslog-8.2604.0-configure-omotel.patch
 Patch103: rsyslog-8.2602.0-omelasticsearch-suspend-bad-http-status-1.patch
 Patch104: rsyslog-8.2602.0-omelasticsearch-suspend-bad-http-status-2.patch
 
