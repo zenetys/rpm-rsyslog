@@ -17,7 +17,7 @@
 %global __requires_exclude_from ^%{_bindir}/rsyslog-recover-qi\\.pl$
 
 %define libestr                 libestr-0.1.11
-%define liblognorm              liblognorm-2.0.9
+%define liblognorm              liblognorm-2.1.0
 %define liblogging              liblogging-1.0.8
 %define libfastjson             libfastjson-1.2304.0
 %define librelp                 librelp-1.12.0
@@ -30,7 +30,7 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2604.0
+Version: 8.2606.0
 Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
@@ -48,10 +48,7 @@ Source304: http://download.rsyslog.com/librelp/%{librelp}.tar.gz
 Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxminddb_version}/%{libmaxminddb}.tar.gz
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
-Patch101: rsyslog-8.2604.0-liboverride-tests.patch
 Patch102: rsyslog-8.2604.0-configure-omotel.patch
-Patch103: rsyslog-8.2602.0-omelasticsearch-suspend-bad-http-status-1.patch
-Patch104: rsyslog-8.2602.0-omelasticsearch-suspend-bad-http-status-2.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -59,6 +56,7 @@ Packager: Benoit DOLEZ <bdolez@zenetys.com>
 
 BuildRequires: apr-util-devel
 BuildRequires: autoconf
+BuildRequires: autoconf-archive
 BuildRequires: automake
 BuildRequires: bison
 BuildRequires: gcc
@@ -193,10 +191,7 @@ MySQL database support to rsyslog.
 
 cd rsyslog-%{version}
 # rsyslog patches
-%patch -P 101 -p1
 %patch -P 102 -p1
-%patch -P 103 -p1
-%patch -P 104 -p1
 cd ..
 
 %build
