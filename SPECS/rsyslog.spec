@@ -31,7 +31,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2606.0
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -49,6 +49,7 @@ Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxmin
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
 Patch102: rsyslog-8.2604.0-configure-omotel.patch
+Patch103: rsyslog-8.2606.0-imjournal-stop-invalidation-reopen-busy-loop.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -192,6 +193,7 @@ MySQL database support to rsyslog.
 cd rsyslog-%{version}
 # rsyslog patches
 %patch -P 102 -p1
+%patch -P 103 -p1
 cd ..
 
 %build
