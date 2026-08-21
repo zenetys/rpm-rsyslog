@@ -20,7 +20,7 @@
 %define liblognorm              liblognorm-2.1.0
 %define liblogging              liblogging-1.0.8
 %define libfastjson             libfastjson-1.2304.0
-%define librelp                 librelp-1.12.0
+%define librelp                 librelp-1.13.0
 %define libmaxminddb_version    1.13.3
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
 %define civetweb_version        1.16
@@ -30,8 +30,8 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2606.0
-Release: 3%{?dist}.zenetys
+Version: 8.2608.0
+Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -49,7 +49,6 @@ Source402: https://github.com/maxmind/libmaxminddb/releases/download/%{libmaxmin
 Source403: https://github.com/civetweb/civetweb/archive/refs/tags/v%{civetweb_version}.tar.gz#/%{civetweb}.tar.gz
 
 Patch102: rsyslog-8.2604.0-configure-omotel.patch
-Patch103: rsyslog-8.2606.0-imjournal-stop-invalidation-reopen-busy-loop.patch
 
 URL: http://www.rsyslog.com/
 Vendor: Adiscon GmbH, Deutschland
@@ -71,6 +70,7 @@ BuildRequires: libyaml-devel
 BuildRequires: make
 BuildRequires: net-snmp-devel
 BuildRequires: openssl-devel
+BuildRequires: python3
 BuildRequires: pkgconfig
 BuildRequires: pkgconfig(libcurl)
 BuildRequires: pkgconfig(libzstd)
@@ -193,7 +193,6 @@ MySQL database support to rsyslog.
 cd rsyslog-%{version}
 # rsyslog patches
 %patch -P 102 -p1
-%patch -P 103 -p1
 cd ..
 
 %build
@@ -510,6 +509,7 @@ done
 %{_bindir}/lognormalizer
 %{_bindir}/rscryutil
 %{_bindir}/rsyslog-recover-qi.pl
+%{_bindir}/rsyslog-segqueue
 %dir %{_libdir}/rsyslog
 %{_libdir}/rsyslog/fmhash.so
 %{_libdir}/rsyslog/fmhttp.so
