@@ -31,7 +31,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2608.0
-Release: 3%{?dist}.zenetys
+Release: 4%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -262,6 +262,7 @@ liblognorm_configure_opts+=( JSON_C_LIBS="-L%{builddir}/%{libfastjson}/.libs -lf
 (
   cd %{liblognorm}
   %configure %{static_only} \
+    --enable-turbo \
     ${liblognorm_configure_cflags:+"CFLAGS=$liblognorm_configure_cflags"} \
     ${liblognorm_configure_ldflags:+"LDFLAGS=$liblognorm_configure_ldflags"} \
     "${liblognorm_configure_opts[@]}"
