@@ -17,11 +17,11 @@
 %global __requires_exclude_from ^%{_bindir}/rsyslog-recover-qi\\.pl$
 
 %define libestr                 libestr-0.1.11
-%define liblognorm              liblognorm-2.1.0
+%define liblognorm              liblognorm-2.1.1
 %define liblogging              liblogging-1.0.8
 %define libfastjson             libfastjson-1.2609.0
 %define librelp                 librelp-1.13.0
-%define libmaxminddb_version    1.13.3
+%define libmaxminddb_version    1.14.0
 %define libmaxminddb            libmaxminddb-%{libmaxminddb_version}
 %define civetweb_version        1.16
 %define civetweb                civetweb-%{civetweb_version}
@@ -31,7 +31,7 @@
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
 Version: 8.2608.0
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
