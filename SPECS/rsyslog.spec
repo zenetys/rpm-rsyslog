@@ -30,8 +30,8 @@
 
 Summary: Rsyslog v8 package by Zenetys
 Name: rsyslog8z
-Version: 8.2608.0
-Release: 5%{?dist}.zenetys
+Version: 8.2610.0
+Release: 1%{?dist}.zenetys
 License: GPLv3+ and ASL 2.0
 Group: System Environment/Daemons
 
@@ -406,6 +406,9 @@ OPTIONS=(
   --enable-impstats-push
   # --enable-imtuxedoulog
   --enable-omdtls
+%if 0%{?rhel} >= 9
+  --enable-omkinesis
+%endif
   --enable-omprog
   --enable-omstdout
   # --enable-journal-tests
@@ -569,6 +572,9 @@ done
 %{_libdir}/rsyslog/omelasticsearch.so
 %{_libdir}/rsyslog/omhttp.so
 %{_libdir}/rsyslog/omjournal.so
+%if 0%{?rhel} >= 9
+%{_libdir}/rsyslog/omkinesis.so
+%endif
 %{_libdir}/rsyslog/ommail.so
 %{_libdir}/rsyslog/omprog.so
 %{_libdir}/rsyslog/omrelp.so
