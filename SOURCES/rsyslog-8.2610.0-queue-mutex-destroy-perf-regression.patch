@@ -1,0 +1,368 @@
+From 29eb8560705165dc5b19adfaa2f65dfbbd9af558 Mon Sep 17 00:00:00 2001
+From: Rainer Gerhards <rgerhards@adiscon.com>
+Date: Thu, 29 Oct 2026 18:27:01 +0000
+Subject: [PATCH] queue: destroy completed messages under the queue mutex again
+
+Why:
+Unlocked disposal from 454b340a1 costs ~40% more CPU and ~12% less
+throughput on JSON-heavy rulesets with several queue workers, see
+https://github.com/rsyslog/rsyslog/issues/7884
+
+Impact: classic queue workers free completed batches under the mutex.
+Before/After: concurrent unlocked frees -> serialized frees in lock.
+
+Technical Overview:
+With deferred disposal, every worker frees its batch concurrently
+right after unlocking. perf shows the frees from msgDestruct() and
+the mallocs from scriptExec() of the next batch fighting for the same
+glibc arena lock: futex calls grew from ~320k to ~7M per run.
+Classic (non-local) queues now destroy the batch in
+qqueueDisposeBatch() under the queue mutex, as before 454b340a1, so
+their deferred buffer stays empty and the drain calls are no-ops.
+Local queue backends keep their own deferred disposal unchanged.
+Drop queue-deferred-idle-wakeup.sh, queue-deferred-idle-shutdown.sh
+and their interposer: they assert unlocked classic disposal.
+The cancellation and idle shutdown rechecks from 454b340a1 stay.
+
+With the help of AI-Agents: Claude Code
+
+Co-Authored-By: Julien Thomas <jthomas@zenetys.com>
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01VGYuTLsfhRMTu6DQ26dtep
+---
+ doc/ai/designs/local-queue-frontends.md    |  5 +-
+ doc/ai/designs/local-queue-s0-ownership.md |  2 +-
+ doc/ai/module_map.yaml                     |  2 +-
+ runtime/queue.c                            | 24 +++++---
+ tests/Makefile.am                          | 11 +---
+ tests/override_queue_disposal.c            | 72 ----------------------
+ tests/queue-deferred-idle-shutdown.sh      | 42 -------------
+ tests/queue-deferred-idle-wakeup.sh        | 44 -------------
+ 8 files changed, 20 insertions(+), 182 deletions(-)
+ delete mode 100644 tests/override_queue_disposal.c
+ delete mode 100755 tests/queue-deferred-idle-shutdown.sh
+ delete mode 100755 tests/queue-deferred-idle-wakeup.sh
+
+diff --git a/doc/ai/designs/local-queue-frontends.md b/doc/ai/designs/local-queue-frontends.md
+index 77af358af3..37272be3c3 100644
+--- a/doc/ai/designs/local-queue-frontends.md
++++ b/doc/ai/designs/local-queue-frontends.md
+@@ -1029,9 +1029,8 @@ Use exact ID multiset coverage for loss/duplication checks; do not assert global
+ output order. For intentionally retry-ambiguous remote outcomes, define the
+ allowed duplicate set rather than using an unjustified exactly-once oracle.
+ Add ASan/UBSan and TSan coverage for ownership and interleavings. Existing useful
+-regressions include [FixedArray out-of-order retirement](../../../tests/queue-fixedarray-outoforder.sh),
+-[deferred idle shutdown](../../../tests/queue-deferred-idle-shutdown.sh), and
+-[classic DA retry/restart](../../../tests/classic-da-retry-restart.sh).
++regressions include [FixedArray out-of-order retirement](../../../tests/queue-fixedarray-outoforder.sh)
++and [classic DA retry/restart](../../../tests/classic-da-retry-restart.sh).
+ 
+ ## 20. Performance hypotheses and acceptance method
+ 
+diff --git a/doc/ai/designs/local-queue-s0-ownership.md b/doc/ai/designs/local-queue-s0-ownership.md
+index 3f37b134e2..7000a7feb1 100644
+--- a/doc/ai/designs/local-queue-s0-ownership.md
++++ b/doc/ai/designs/local-queue-s0-ownership.md
+@@ -221,7 +221,7 @@ and must implement its own complete memory-only terminal-ownership policy.
+ | Contract | Existing evidence to retain | New or later evidence |
+ |---|---|---|
+ | Out-of-order RAM completion | [`queue-fixedarray-outoforder.sh`](../../../tests/queue-fixedarray-outoforder.sh) | Narrow dispatch test must prove completion affects the acquired store only. |
+-| Deferred cleanup and missed-wakeup boundaries | [`queue-deferred-idle-wakeup.sh`](../../../tests/queue-deferred-idle-wakeup.sh), [`queue-deferred-idle-shutdown.sh`](../../../tests/queue-deferred-idle-shutdown.sh) | Cancellation with an active lease, including deferred destructor ownership. |
++| Deferred cleanup and missed-wakeup boundaries | None for classic queues since unlocked disposal was reverted (issue #7884) | Cancellation with an active lease, including deferred destructor ownership. |
+ | Worker wait and lifecycle | [`wtp-targeted-wakeup.sh`](../../../tests/wtp-targeted-wakeup.sh) | S2 FE/BE wake protocol and producer-capacity wakeup tests. |
+ | Transactional partial outcomes | [`action-tx-errfile.sh`](../../../tests/action-tx-errfile.sh) | Normal, retry, partial, and cancellation outcomes in one deterministic lease oracle. |
+ | DA save and restart | [`classic-da-persist.sh`](../../../tests/classic-da-persist.sh), [`segmented-da-persist.sh`](../../../tests/segmented-da-persist.sh) | S1 confirms native logical-parent/physical-child ownership; S5 adds FE drain before DA save/restart. |
+diff --git a/doc/ai/module_map.yaml b/doc/ai/module_map.yaml
+index f4b760307f..e16beccae9 100644
+--- a/doc/ai/module_map.yaml
++++ b/doc/ai/module_map.yaml
+@@ -125,7 +125,7 @@ runtime_queue:
+       make tentative ruleset COMM uncertain even when the outer callback returns
+       OK. Interrupted and non-OK callbacks retain at-least-once replay, which may
+       repeat earlier script mutations or successful action effects.
+-    - Completed message references move to a bounded worker buffer after store completion and are destroyed outside the queue mutex, before callbacks or waits; cancellation is disabled during this transfer and disposal.
++    - Classic queues destroy completed messages under the queue mutex (unlocked disposal was reverted, issue #7884). Local queue backends move completed references to a bounded worker buffer and destroy them outside the mutex, before callbacks or waits, with cancellation disabled.
+     - RAM retirement releases completed counts independently of batch order; segmentedDisk retains its ordered persistent frontier.
+     - queue_da resolves the durable disk-child engine at startup and atomically publishes its marker before first persistent data; engines never switch while a process is running.
+     - The segmented store is lazy only for a disk-assisted child, and dematerialization requires an empty store with no recovery, batch, retry, or completion work pending.
+diff --git a/runtime/queue.c b/runtime/queue.c
+index 8abcc0fbf4..73b4ec3bfc 100644
+--- a/runtime/queue.c
++++ b/runtime/queue.c
+@@ -3268,8 +3268,8 @@ static rsRetVal DeleteBatchFromQStore(qqueue_t *pThis, batch_t *pBatch) {
+ }
+ 
+ 
+-/* Concurrency & Locking: completed batch references move to a worker-owned
+- * buffer under the queue mutex, after store commit. The buffer holds at most
++/* Concurrency & Locking: local queue backends move completed batch references
++ * to a worker-owned buffer under the queue mutex, after store commit. The buffer holds at most
+  * one batch and is drained without the queue mutex and with cancellation
+  * disabled. No other worker, producer, or shutdown path accesses this buffer.
+  */
+@@ -3290,15 +3290,21 @@ static void qqueueDrainDeferredLocked(qqueue_t *const pThis, wti_t *const pWti)
+     }
+ }
+ 
+-static void qqueueDeferBatch(wti_t *const pWti) {
++/* Classic queues destroy completed messages here, under the queue mutex.
++ * Deferring this to unlocked per-worker disposal (454b340a1) made workers
++ * free concurrently and contend on malloc arena locks with the next batch's
++ * allocations, costing ~40% CPU on JSON-heavy rulesets (issue #7884).
++ * Serialized release under the mutex is cheaper there. Local queue backends
++ * still defer through p_deferred_msgs; see qqueueCompleteLocalBackend().
++ */
++static void qqueueDisposeBatch(wti_t *const pWti) {
+     batch_t *const pBatch = &pWti->batch;
+     assert(pWti->n_deferred_msgs == 0);
+     assert(pBatch->nElem <= pBatch->maxElem);
+     for (int i = 0; i < pBatch->nElem; ++i) {
+-        pWti->p_deferred_msgs[i] = pBatch->pElem[i].pMsg;
++        msgDestruct(&pBatch->pElem[i].pMsg);
+         pBatch->pElem[i].pMsg = NULL;
+     }
+-    pWti->n_deferred_msgs = pBatch->nElem;
+     pBatch->nElem = pBatch->nElemDeq = 0;
+ }
+ 
+@@ -3440,7 +3446,7 @@ static rsRetVal DeleteProcessedBatch(qqueue_t *pThis, wti_t *pWti) {
+         }
+         ATOMIC_SUB(&pThis->nLogDeq, committed, &pThis->mutLogDeq);
+         if (diskOwner != NULL) qqueueLocalDiskTerminal(diskOwner, diskTerminal, diskDiscarded);
+-        qqueueDeferBatch(pWti);
++        qqueueDisposeBatch(pWti);
+         pBatch->storeData = NULL;
+         if (hadResponsibility) {
+             iRet = qqueueClearWtiSource(pThis, pWti);
+@@ -3494,7 +3500,7 @@ static rsRetVal DeleteProcessedBatch(qqueue_t *pThis, wti_t *pWti) {
+     iRet = DeleteBatchFromQStore(pThis, pBatch);
+     if (iRet == RS_RET_OK && diskOwner != NULL) qqueueLocalDiskTerminal(diskOwner, diskTerminal, diskDiscarded);
+ 
+-    qqueueDeferBatch(pWti);
++    qqueueDisposeBatch(pWti);
+     if (iRet == RS_RET_OK && hadResponsibility) iRet = qqueueClearWtiSource(pThis, pWti);
+ 
+     RETiRet;
+@@ -4064,8 +4070,8 @@ static rsRetVal batchProcessed(qqueue_t *pThis, wti_t *pWti) {
+ 
+     int iCancelStateSave;
+     qqueue_t *const pSource = pWti->source_queue;
+-    /* DeleteProcessedBatch() defers final message destruction by resetting
+-     * the batch counters, so retain the dequeue count for checkpointing. */
++    /* DeleteProcessedBatch() resets the batch counters, so retain the
++     * dequeue count for checkpointing. */
+     const int nElemDeq = pWti->batch.nElemDeq;
+     /* at this spot, we must not be cancelled */
+     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &iCancelStateSave);
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index 00edb7924f..be72df4aa2 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -112,8 +112,6 @@ EXTRA_DIST += $(TESTS_QUEUE_BENCHMARK_LATENCY_ORACLE) ../benchmarks/queue-conten
+ 	../benchmarks/queue-contention/latency-observer-selftest.py ../benchmarks/queue-contention/trial-latency.sh \
+ 	../benchmarks/queue-contention/compare-latency.py ../benchmarks/queue-contention/docker_image.py
+ 
+-TESTS_QUEUE_DEFERRED_IDLE_WAKEUP = queue-deferred-idle-wakeup.sh queue-deferred-idle-shutdown.sh
+-EXTRA_DIST += $(TESTS_QUEUE_DEFERRED_IDLE_WAKEUP) override_queue_disposal.c
+ TESTS_QUEUE_LEASE = queue-discard-only-lease.sh queue-lease-attribution.sh
+ EXTRA_DIST += $(TESTS_QUEUE_LEASE)
+ 
+@@ -3183,13 +3181,6 @@ liboverride_getaddrinfo_la_SOURCES = override_getaddrinfo.c
+ liboverride_getaddrinfo_la_CFLAGS =
+ liboverride_getaddrinfo_la_LDFLAGS = $(TEST_LIBOVERRIDE_LDFLAGS)
+ 
+-check_LTLIBRARIES += liboverride_queue_disposal.la
+-liboverride_queue_disposal_la_SOURCES = override_queue_disposal.c
+-liboverride_queue_disposal_la_CPPFLAGS = $(runtime_unit_linkedlist_CPPFLAGS)
+-liboverride_queue_disposal_la_CFLAGS =
+-liboverride_queue_disposal_la_LDFLAGS = $(TEST_LIBOVERRIDE_LDFLAGS)
+-liboverride_queue_disposal_la_LIBADD = $(LIBFASTJSON_LIBS) $(DL_LIBS) $(PTHREADS_LIBS)
+-
+ if ENABLE_IMPTCP
+ check_LTLIBRARIES += liboverride_epoll_ctl.la
+ liboverride_epoll_ctl_la_SOURCES = override_epoll_ctl.c
+@@ -3380,7 +3371,7 @@ endif # if ENABLE_ELASTICSEARCH_TESTS
+ if ENABLE_DEFAULT_TESTS
+ TESTS += $(TESTS_DEFAULT)
+ TESTS += $(TESTS_MERMAID_OFFLINE)
+-TESTS += $(TESTS_QUEUE_BENCHMARK_ORACLE) $(TESTS_QUEUE_DEFERRED_IDLE_WAKEUP)
++TESTS += $(TESTS_QUEUE_BENCHMARK_ORACLE)
+ TESTS += $(TESTS_QUEUE_LEASE)
+ TESTS += $(TESTS_QUEUE_BENCHMARK_THROUGHPUT_CONFIG)
+ if ENABLE_IMTCP_TESTS
+diff --git a/tests/override_queue_disposal.c b/tests/override_queue_disposal.c
+deleted file mode 100644
+index b9b962b66e..0000000000
+--- a/tests/override_queue_disposal.c
++++ /dev/null
+@@ -1,72 +0,0 @@
+-/* SPDX-License-Identifier: Apache-2.0 */
+-/* Pause the final JSON-root release for one marked message. The main executable
+- * binds msgDestruct internally, so interpose its external libfastjson release
+- * instead. The test never renders or replaces this tree before destruction.
+- * A FIFO handshake gives the test an exact unlocked-disposal/idle interleaving;
+- * poll bounds a missing release and preserves a nonzero daemon failure oracle.
+- */
+-#include "config.h"
+-#include "atomic.h"
+-#include <dlfcn.h>
+-#include <errno.h>
+-#include <fcntl.h>
+-#include <poll.h>
+-#include <pthread.h>
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <time.h>
+-#include <unistd.h>
+-#include <json.h>
+-
+-static int (*real_put)(struct json_object *);
+-static pthread_once_t resolve_once = PTHREAD_ONCE_INIT;
+-DEF_ATOMIC_HELPER_MUT(claim_mutex);
+-static int claimed;
+-
+-static void resolve_put(void) {
+-    INIT_ATOMIC_HELPER_MUT(claim_mutex);
+-    dlerror();
+-    real_put = (int (*)(struct json_object *))dlsym(RTLD_NEXT, "fjson_object_put");
+-    if (dlerror() != NULL || real_put == NULL) {
+-        fputs("queue disposal hook: cannot resolve fjson_object_put\n", stderr);
+-        _exit(2);
+-    }
+-}
+-
+-int json_object_put(struct json_object *object) {
+-    struct json_object *marker;
+-    const char *ready;
+-    const char *release;
+-    int pipefd;
+-    int readyfd;
+-    struct pollfd fd;
+-    struct timespec started, now;
+-    int remaining;
+-    int polled;
+-    char byte;
+-
+-    pthread_once(&resolve_once, resolve_put);
+-    if (object != NULL && json_object_get_type(object) == json_type_object &&
+-        json_object_object_get_ex(object, "queue_disposal_gate", &marker) && ATOMIC_CAS(&claimed, 0, 1, &claim_mutex)) {
+-        ready = getenv("RSYSLOG_QUEUE_DISPOSAL_READY");
+-        release = getenv("RSYSLOG_QUEUE_DISPOSAL_RELEASE");
+-        if (ready == NULL || release == NULL) _exit(2);
+-        pipefd = open(release, O_RDONLY | O_NONBLOCK);
+-        readyfd = open(ready, O_WRONLY | O_CREAT | O_EXCL, 0600);
+-        if (pipefd < 0 || readyfd < 0 || write(readyfd, "ready\n", 6) != 6 || close(readyfd) != 0) _exit(2);
+-        fd.fd = pipefd;
+-        fd.events = POLLIN;
+-        fd.revents = 0;
+-        if (clock_gettime(CLOCK_MONOTONIC, &started) != 0) _exit(2);
+-        remaining = 30000;
+-        while ((polled = poll(&fd, 1, remaining)) < 0 && errno == EINTR) {
+-            /* Shutdown signals the paused worker with SIGTTIN. Keep the
+-             * handshake alive without extending its bounded deadline. */
+-            if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) _exit(2);
+-            remaining = 30000 - (int)((now.tv_sec - started.tv_sec) * 1000 + (now.tv_nsec - started.tv_nsec) / 1000000);
+-            if (remaining <= 0) _exit(2);
+-        }
+-        if (polled != 1 || read(pipefd, &byte, 1) != 1 || close(pipefd) != 0) _exit(2);
+-    }
+-    return real_put(object);
+-}
+diff --git a/tests/queue-deferred-idle-shutdown.sh b/tests/queue-deferred-idle-shutdown.sh
+deleted file mode 100755
+index 4ad5a7ce9a..0000000000
+--- a/tests/queue-deferred-idle-shutdown.sh
++++ /dev/null
+@@ -1,42 +0,0 @@
+-#!/bin/bash
+-# SPDX-License-Identifier: Apache-2.0
+-# Hold the final JSON destructor while the empty-queue worker is unlocked and
+-# not registered as a waiter, then request shutdown. The debug marker proves
+-# shutdown has set the pool state and sent its wakeup before disposal resumes.
+-# Bounded proper termination proves the worker rechecks stop state after this
+-# unlock instead of losing shutdown's wakeup. Limits diagnose a deadlock;
+-# ordering comes from the FIFO and the post-signal shutdown marker.
+-#
+-# This file is part of rsyslog.
+-# Released under ASL 2.0
+-. ${srcdir:=.}/diag.sh init
+-skip_platform "AIX" "test requires shared-library interposition"
+-skip_ASAN "LD_PRELOAD conflicts with ASan runtime load order"
+-check_command_available timeout
+-export RSYSLOG_QUEUE_DISPOSAL_READY="$PWD/$RSYSLOG_DYNNAME.ready"
+-export RSYSLOG_QUEUE_DISPOSAL_RELEASE="$PWD/$RSYSLOG_DYNNAME.release"
+-export RSYSLOG_PRELOAD=.libs/liboverride_queue_disposal.so
+-export RSYSLOG_DEBUG="Debug"
+-export RSYSLOG_DEBUGLOG="$RSYSLOG_DYNNAME.debuglog"
+-mkfifo "$RSYSLOG_QUEUE_DISPOSAL_RELEASE"
+-generate_conf
+-add_conf '
+-global(processInternalMessages="off")
+-main_queue(queue.type="FixedArray" queue.size="128"
+-    queue.workerThreads="1" queue.dequeueBatchSize="1"
+-    queue.timeoutShutdown="20000")
+-template(name="outfmt" type="string" string="%msg:F,58:2%\n")
+-if ($msg contains "msgnum:") then {
+-    set $!queue_disposal_gate = "held";
+-    action(type="omfile" file="'$RSYSLOG_OUT_LOG'" template="outfmt")
+-}
+-'
+-startup
+-injectmsg 0 1
+-wait_file_lines "$RSYSLOG_QUEUE_DISPOSAL_READY" 1 10
+-shutdown_immediate
+-TB_TEST_TIMEOUT=10 wait_content 'main Q:Reg: waiting .* on worker thread termination' "$RSYSLOG_DEBUGLOG"
+-timeout 10 bash -c 'printf "release\n" > "$RSYSLOG_QUEUE_DISPOSAL_RELEASE"' || error_exit 1
+-wait_shutdown "" 10
+-seq_check 0 0
+-exit_test
+diff --git a/tests/queue-deferred-idle-wakeup.sh b/tests/queue-deferred-idle-wakeup.sh
+deleted file mode 100755
+index 6557a0b5b7..0000000000
+--- a/tests/queue-deferred-idle-wakeup.sh
++++ /dev/null
+@@ -1,44 +0,0 @@
+-#!/bin/bash
+-# SPDX-License-Identifier: Apache-2.0
+-# Pause final msg0 JSON destruction using an external-library interposer.
+-# While the worker is outside the queue mutex and not yet a queue waiter,
+-# enqueue msg1 and then release the destructor. Successful bounded admission
+-# proves destruction is unlocked; output of msg1 proves the idle path retests
+-# the queue after disposal instead of losing that enqueue's wakeup. FIFO
+-# readiness/release determines ordering; time limits only diagnose a deadlock.
+-# The test-only hook cannot coexist with ASan's runtime-first load order.
+-#
+-# This file is part of rsyslog.
+-# Released under ASL 2.0
+-. ${srcdir:=.}/diag.sh init
+-skip_platform "AIX" "test requires shared-library interposition"
+-skip_ASAN "LD_PRELOAD conflicts with ASan runtime load order"
+-check_command_available timeout
+-export RSYSLOG_QUEUE_DISPOSAL_READY="$PWD/$RSYSLOG_DYNNAME.ready"
+-export RSYSLOG_QUEUE_DISPOSAL_RELEASE="$PWD/$RSYSLOG_DYNNAME.release"
+-export RSYSLOG_PRELOAD=.libs/liboverride_queue_disposal.so
+-mkfifo "$RSYSLOG_QUEUE_DISPOSAL_RELEASE"
+-generate_conf
+-add_conf '
+-global(processInternalMessages="off")
+-main_queue(queue.type="FixedArray" queue.size="128"
+-    queue.workerThreads="1" queue.dequeueBatchSize="1")
+-template(name="outfmt" type="string" string="%msg:F,58:2%\n")
+-if ($msg contains "msgnum:") then {
+-    if ($msg contains "msgnum:00000000:") then
+-        set $!queue_disposal_gate = "held";
+-    action(type="omfile" file="'$RSYSLOG_OUT_LOG'" template="outfmt")
+-}
+-'
+-startup
+-injectmsg 0 1
+-wait_file_lines "$RSYSLOG_QUEUE_DISPOSAL_READY" 1 10
+-# Direct diagtalker permits a strict bound on admission while the destructor
+-# remains paused. A queued TCP send alone would not prove admission completed.
+-printf 'injectmsg 1 1\n' | timeout 10 "$TESTTOOL_DIR/diagtalker" -p"$IMDIAG_PORT" || error_exit 1
+-timeout 10 bash -c 'printf "release\n" > "$RSYSLOG_QUEUE_DISPOSAL_RELEASE"' || error_exit 1
+-wait_file_lines "$RSYSLOG_OUT_LOG" 2 10
+-shutdown_when_empty
+-wait_shutdown
+-seq_check 0 1
+-exit_test
